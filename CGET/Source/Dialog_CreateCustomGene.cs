@@ -539,10 +539,11 @@ namespace CustomGeneExporter
 
             if (listing.ButtonText("CGET_ExportButton".Translate()))
             {
-                // 导出前校验packageId
-                if (string.IsNullOrEmpty(modPackageId))
+                // 导出前校验packageId（格式不合法会让游戏每次启动都刷警告，必须拦下来）
+                string packageIdError = GeneExporter.GetPackageIdError(modPackageId);
+                if (packageIdError != null)
                 {
-                    Messages.Message("CGET_PackageIdRequired".Translate(), MessageTypeDefOf.RejectInput, false);
+                    Messages.Message(packageIdError, MessageTypeDefOf.RejectInput, false);
                     return;
                 }
 
@@ -641,16 +642,58 @@ namespace CustomGeneExporter
             {
                 pendingGenes[existingIndex] = spec;
                 Messages.Message("CGET_GeneUpdated".Translate(spec.Name), MessageTypeDefOf.TaskCompletion, false);
+                return;
             }
-            else
+
+            pendingGenes.Add(spec);
+            Messages.Message("CGET_GeneAddedReset".Translate(spec.Name, pendingGenes.Count), MessageTypeDefOf.TaskCompletion, false);
+
+            // 添加完就清空编辑区，否则做下一个基因时会默认带着上一个的描述、数值、分类
+            ResetEditorForNewGene();
+        }
+
+        // 只清空“当前基因”相关字段，模组名称/作者/PackageId/预览图保持不变
+        private void ResetEditorForNewGene()
+        {
+            geneName = "";
+            geneDescription = "";
+            metabolism = 0;
+            complexity = 0;
+            colorGeneType = GeneColorType.None;
+            skinRedText = "200";
+            skinGreenText = "160";
+            skinBlueText = "120";
+            iconPath = "";
+            selectedCategory = null;
+            selectedGeneClass = null;
+            selectedGeneClassMod = null;
+            selectedClassCustomEffects.Clear();
+            disablesNeedsList.Clear();
+            statFactors.Clear();
+            statOffsets.Clear();
+            statValueBuffers.Clear();
+        }
+
+        // 编辑区里如果正在编辑列表里已有的基因，以编辑区为准；否则改了描述/数值再导出会写回旧数据
+        private void SyncEditorIntoPendingList()
+        {
+            GeneExportSpec current = CaptureCurrentGene();
+            if (current.Name.Length == 0)
             {
-                pendingGenes.Add(spec);
-                Messages.Message("CGET_GeneAdded".Translate(spec.Name, pendingGenes.Count), MessageTypeDefOf.TaskCompletion, false);
+                return;
+            }
+
+            int index = pendingGenes.FindIndex(g => string.Equals(g.Name, current.Name, StringComparison.OrdinalIgnoreCase));
+            if (index >= 0)
+            {
+                pendingGenes[index] = current;
             }
         }
 
         private void TryExportAll()
         {
+            SyncEditorIntoPendingList();
+
             List<GeneExportSpec> genes;
             if (pendingGenes.Count > 0)
             {
@@ -684,6 +727,14 @@ namespace CustomGeneExporter
         // 真正导出：先查 defName 重复，重复就弹窗确认覆盖
         private void StartExport(List<GeneExportSpec> genes)
         {
+            // 同一个基因曾经用别的 packageId 导出过 -> 两个 Mod 会同时定义同一个 defName
+            List<string> otherFolders = GeneExporter.FindGenesInOtherExportFolders(modPackageId, genes);
+            if (otherFolders.Count > 0)
+            {
+                Messages.Message("CGET_DuplicateInOtherFolder".Translate(string.Join("\n", otherFolders.ToArray())),
+                    MessageTypeDefOf.CautionInput, false);
+            }
+
             List<string> conflicts = GeneExporter.FindGeneNameConflicts(modPackageId, genes);
             if (conflicts.Count > 0)
             {
@@ -845,34 +896,44 @@ namespace CustomGeneExporter
                 : selectedCategory.label));
             sb.AppendLine("CGET_LineGeneType".Translate(GetColorGeneTypeLabel()));
 
-            if (colorGeneType != GeneColorType.None)
+            // 颜色预览行单独绘制：用真正的色块矩形，而不是依赖字体里 ■ 的 <color> 上色
+            bool showColorLine = colorGeneType != GeneColorType.None;
+            string colorPrefix = null;
+            string colorSuffix = null;
+            Color colorPreview = Color.white;
+
+            StringBuilder sbAfter = new StringBuilder();
+
+            if (showColorLine)
             {
                 int r = ParseRgbChannel(skinRedText, 200);
                 int g = ParseRgbChannel(skinGreenText, 160);
                 int b = ParseRgbChannel(skinBlueText, 120);
                 string hex = GetSkinColorHex();
                 string colorLabel = colorGeneType == GeneColorType.HairColor ? "CGET_HairColor".Translate() : "CGET_SkinColor".Translate();
-                sb.AppendLine("CGET_ColorPreviewLine".Translate(colorLabel, hex, r, g, b));
-                sb.AppendLine("CGET_OutputResult".Translate(GeneExporter.FormatColor(r, g, b)));
+                colorPrefix = "CGET_ColorPreviewPrefix".Translate(colorLabel);
+                colorSuffix = "CGET_ColorPreviewSuffix".Translate(hex, r, g, b);
+                colorPreview = new Color(r / 255f, g / 255f, b / 255f, 1f);
+                sbAfter.AppendLine("CGET_OutputResult".Translate(GeneExporter.FormatColor(r, g, b)));
             }
 
             if (selectedGeneClass != null)
             {
-                sb.AppendLine("CGET_LineGeneClass".Translate(selectedGeneClass.FullName));
-                sb.AppendLine("CGET_LineSourceMod".Translate(selectedGeneClassMod.Name));
+                sbAfter.AppendLine("CGET_LineGeneClass".Translate(selectedGeneClass.FullName));
+                sbAfter.AppendLine("CGET_LineSourceMod".Translate(selectedGeneClassMod == null ? "-" : selectedGeneClassMod.Name));
 
                 if (selectedClassCustomEffects.Count > 0)
                 {
-                    sb.AppendLine("CGET_CustomEffectsHeader".Translate());
+                    sbAfter.AppendLine("CGET_CustomEffectsHeader".Translate());
                     foreach (var effect in selectedClassCustomEffects)
                     {
-                        sb.AppendLine("  - " + effect);
+                        sbAfter.AppendLine("  - " + effect);
                     }
                 }
             }
 
-            sb.AppendLine();
-            sb.AppendLine("CGET_EffectsHeader".Translate());
+            sbAfter.AppendLine();
+            sbAfter.AppendLine("CGET_EffectsHeader".Translate());
 
             bool hasListEffects = false;
             if (colorGeneType == GeneColorType.None)
@@ -882,7 +943,7 @@ namespace CustomGeneExporter
                     hasListEffects = true;
                     foreach (var need in disablesNeedsList)
                     {
-                        sb.AppendLine("CGET_RemovesNeed".Translate(need.label));
+                        sbAfter.AppendLine("CGET_RemovesNeed".Translate(need.label));
                     }
                 }
 
@@ -891,7 +952,7 @@ namespace CustomGeneExporter
                     hasListEffects = true;
                     foreach (var factor in statFactors)
                     {
-                        sb.AppendLine("• " + factor.stat.label + " " + DescribeStatModifier(factor, true));
+                        sbAfter.AppendLine("• " + factor.stat.label + " " + DescribeStatModifier(factor, true));
                     }
                 }
 
@@ -900,28 +961,65 @@ namespace CustomGeneExporter
                     hasListEffects = true;
                     foreach (var offset in statOffsets)
                     {
-                        sb.AppendLine("• " + offset.stat.label + " " + DescribeStatModifier(offset, false));
+                        sbAfter.AppendLine("• " + offset.stat.label + " " + DescribeStatModifier(offset, false));
                     }
                 }
             }
             else
             {
                 hasListEffects = true;
-                sb.AppendLine("CGET_ColorCarrierLine".Translate(GetSkinColorHex()));
+                sbAfter.AppendLine("CGET_ColorCarrierLine".Translate(GetSkinColorHex()));
             }
 
             if (!hasListEffects)
             {
-                sb.AppendLine("CGET_NoEffects".Translate());
+                sbAfter.AppendLine("CGET_NoEffects".Translate());
             }
 
             //计算并渲染滚动文本
-            float textHeight = Text.CalcHeight(sb.ToString(), textWidth - 16f);
-            Rect textViewRect = new Rect(0f, 0f, textWidth - 16f, textHeight + 10f);
+            // 去掉末尾的换行，否则 CalcHeight 会多算一行空白，色块行就会浮在中间
+            string textBefore = sb.ToString().TrimEnd('\n');
+            string textAfter = sbAfter.ToString().TrimEnd('\n');
+            float innerWidth = textWidth - 16f;
+            float heightBefore = Text.CalcHeight(textBefore, innerWidth);
+            float colorLineHeight = showColorLine ? Mathf.Max(Text.LineHeight, 22f) : 0f;
+            float heightAfter = Text.CalcHeight(textAfter, innerWidth);
+            Rect textViewRect = new Rect(0f, 0f, innerWidth, heightBefore + colorLineHeight + heightAfter + 10f);
 
             Widgets.BeginScrollView(textOutRect, ref rightScrollPos, textViewRect);
-            Widgets.Label(new Rect(0f, 0f, textViewRect.width, textHeight), sb.ToString());
+            Widgets.Label(new Rect(0f, 0f, innerWidth, heightBefore), textBefore);
+
+            if (showColorLine)
+            {
+                DrawColorPreviewLine(new Rect(0f, heightBefore, innerWidth, colorLineHeight), colorPrefix, colorSuffix, colorPreview);
+            }
+
+            Widgets.Label(new Rect(0f, heightBefore + colorLineHeight, innerWidth, heightAfter), textAfter);
             Widgets.EndScrollView();
+        }
+
+        // 颜色预览行：前缀文字 + 真实色块 + 数值文字
+        private static void DrawColorPreviewLine(Rect rect, string prefix, string suffix, Color color)
+        {
+            const float swatchSize = 14f;
+            float swatchY = rect.y + (rect.height - swatchSize) / 2f;
+
+            float prefixWidth = 0f;
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                prefixWidth = Mathf.Min(Text.CalcSize(prefix).x, rect.width);
+                Widgets.Label(new Rect(rect.x, rect.y, prefixWidth + 2f, rect.height), prefix);
+            }
+
+            Rect swatchRect = new Rect(rect.x + prefixWidth + 4f, swatchY, swatchSize, swatchSize);
+            Widgets.DrawBoxSolid(swatchRect, color);
+            Widgets.DrawBox(swatchRect);
+
+            float suffixX = swatchRect.xMax + 6f;
+            if (suffixX < rect.xMax && !string.IsNullOrEmpty(suffix))
+            {
+                Widgets.Label(new Rect(suffixX, rect.y, rect.xMax - suffixX, rect.height), suffix);
+            }
         }
         //影响栏
         private static string DescribeStatModifier(StatModifier modifier, bool isFactor)
@@ -1082,8 +1180,16 @@ namespace CustomGeneExporter
         // 右侧调色板：HSV 色轮
         private void DrawPendingGenesTable(Rect rect)
         {
-            Widgets.Label(new Rect(rect.x, rect.y, rect.width, 24f),
+            const float manageWidth = 96f;
+            Widgets.Label(new Rect(rect.x, rect.y, Mathf.Max(rect.width - manageWidth - 6f, 80f), 24f),
                 "CGET_PendingGenesHeader".Translate(pendingGenes.Count, GetExportedGeneFileCount()));
+
+            Rect manageRect = new Rect(rect.xMax - manageWidth, rect.y - 2f, manageWidth, 24f);
+            if (Widgets.ButtonText(manageRect, "CGET_ManageExported".Translate()))
+            {
+                ShowManageExportedMenu();
+            }
+            TooltipHandler.TipRegion(manageRect, "CGET_ManageExportedTip".Translate());
 
             const float rowHeight = 28f;
             const float typeColumnWidth = 64f;
@@ -1142,11 +1248,80 @@ namespace CustomGeneExporter
 
                 if (Widgets.ButtonText(new Rect(row.x + deleteColumnX, row.y + 3f, deleteColumnWidth, rowHeight - 6f), "×"))
                 {
-                    pendingGenes.RemoveAt(i);
+                    RemovePendingGene(spec);
                     break;
                 }
             }
             Widgets.EndScrollView();
+        }
+
+        // 从待导出列表移除；如果磁盘上已经导出过，问一下要不要一起删掉
+        private void RemovePendingGene(GeneExportSpec spec)
+        {
+            if (spec == null)
+            {
+                return;
+            }
+
+            if (!GeneExporter.GeneFileExists(modPackageId, spec.Name))
+            {
+                pendingGenes.Remove(spec);
+                return;
+            }
+
+            Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+                "CGET_DeleteExportedConfirm".Translate(spec.Name),
+                delegate
+                {
+                    string error;
+                    if (GeneExporter.DeleteExportedGeneFile(modPackageId, GeneExporter.SanitizeDefNameSegment(spec.Name), out error))
+                    {
+                        Messages.Message("CGET_DeleteExportedDone".Translate(spec.Name), MessageTypeDefOf.TaskCompletion, false);
+                    }
+                    else
+                    {
+                        Messages.Message("CGET_DeleteExportedFailed".Translate(error), MessageTypeDefOf.RejectInput, false);
+                    }
+                    pendingGenes.Remove(spec);
+                    exportedGeneCountRefreshTime = -99f;
+                }, true, "CGET_DeleteExportedTitle".Translate()));
+        }
+
+        // 管理磁盘上已经导出的基因（旧版本遗留的基因也能在这里删掉）
+        private void ShowManageExportedMenu()
+        {
+            List<string> exported = GeneExporter.ListExportedGeneNames(modPackageId);
+            if (exported.Count == 0)
+            {
+                Messages.Message("CGET_NoExportedGenes".Translate(GeneExporter.GetStorageFolderName(modPackageId)),
+                    MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            List<FloatMenuOption> options = new List<FloatMenuOption>();
+            foreach (string name in exported)
+            {
+                string captured = name;
+                options.Add(new FloatMenuOption(captured, delegate
+                {
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+                        "CGET_DeleteExportedConfirm".Translate(captured),
+                        delegate
+                        {
+                            string error;
+                            if (GeneExporter.DeleteExportedGeneFile(modPackageId, captured, out error))
+                            {
+                                Messages.Message("CGET_DeleteExportedDone".Translate(captured), MessageTypeDefOf.TaskCompletion, false);
+                            }
+                            else
+                            {
+                                Messages.Message("CGET_DeleteExportedFailed".Translate(error), MessageTypeDefOf.RejectInput, false);
+                            }
+                            exportedGeneCountRefreshTime = -99f;
+                        }, true, "CGET_DeleteExportedTitle".Translate()));
+                }));
+            }
+            Find.WindowStack.Add(new FloatMenu(options));
         }
 
         private int GetExportedGeneFileCount()
@@ -1156,10 +1331,7 @@ namespace CustomGeneExporter
                 exportedGeneCountRefreshTime = Time.realtimeSinceStartup;
                 try
                 {
-                    string folder = GeneExporter.GeneDefsFolderPath;
-                    exportedGeneFileCount = Directory.Exists(folder)
-                        ? Directory.GetFiles(folder, "GegeXT_*.xml").Length
-                        : 0;
+                    exportedGeneFileCount = GeneExporter.CountExportedGeneFiles(modPackageId);
                 }
                 catch (Exception)
                 {

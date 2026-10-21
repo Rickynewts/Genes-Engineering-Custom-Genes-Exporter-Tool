@@ -19,6 +19,19 @@
 ↳Xenotype Summary
 ▸语言：简体中文
 英语
-▸反馈：
+▸反馈：https://github.com/Rickynewts/Genes-Engineering-Custom-Genes-Exporter-Tool
 ]]></description>
+<!--前置-->
+<modDependencies>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>RimWorld - Biotech</displayName>
+      <downloadUrl>https://store.steampowered.com/app/1826140/</downloadUrl>
+    </li>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+    </li>
+  </modDependencies>
 </ModMetaData>

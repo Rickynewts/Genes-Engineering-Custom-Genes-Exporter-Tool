@@ -44,18 +44,23 @@
     <CGET_StatOffsetsLabel>Stat offsets:</CGET_StatOffsetsLabel>
 
     <CGET_IconPathLabel>[Optional] Custom icon path:</CGET_IconPathLabel>
+    <CGET_IconFormatWarning>Icon format {0} is not supported by the game (use .png/.jpg). The default icon is used instead.</CGET_IconFormatWarning>
     <CGET_PreviewImagePathLabel>[Optional] Custom preview image path:</CGET_PreviewImagePathLabel>
     <CGET_AddToModList>Add to mod list ({0})</CGET_AddToModList>
     <CGET_ExportButton>Export</CGET_ExportButton>
 
     <CGET_PackageIdRequired>PackageId cannot be empty.</CGET_PackageIdRequired>
+    <CGET_PackageIdInvalid>PackageId "{0}" is not valid. Use lowercase letters, digits, underscores and at least one dot (for example author.modname).</CGET_PackageIdInvalid>
     <CGET_GeneNameRequired>Gene name cannot be empty.</CGET_GeneNameRequired>
+    <CGET_GeneNameInvalid>The gene name(s) [{0}] contain no usable characters after removing spaces and punctuation, so the defName would be empty.</CGET_GeneNameInvalid>
     <CGET_GeneUpdated>Updated: {0}</CGET_GeneUpdated>
     <CGET_GeneAdded>Added gene: {0} ({1} total)</CGET_GeneAdded>
+    <CGET_GeneAddedReset>Added gene: {0} ({1} total). The editing area has been cleared for the next gene.</CGET_GeneAddedReset>
     <CGET_UnsavedGeneConfirm>The gene "{0}" in the editing area has not been added to the list, so it will not be included in the export.\n\nExport only the {1} genes in the list?</CGET_UnsavedGeneConfirm>
     <CGET_Notice>Notice</CGET_Notice>
     <CGET_DefNameConflict>The following gene defNames already exist:\n\n{0}\n\nContinuing will overwrite the corresponding XML files. Overwrite?</CGET_DefNameConflict>
     <CGET_DefNameConflictTitle>Duplicate DefName</CGET_DefNameConflictTitle>
+    <CGET_DuplicateInOtherFolder>Warning: these genes already exist in another exported mod folder. If both mods are enabled, the game will report duplicate defNames:\n\n{0}</CGET_DuplicateInOtherFolder>
 
     <CGET_DefaultPreviewInUse>(Using the default preview image)</CGET_DefaultPreviewInUse>
     <CGET_DefaultIcon>(Default icon)</CGET_DefaultIcon>
@@ -77,7 +82,8 @@
     <CGET_CustomEffectsHeader>Custom effect descriptions:</CGET_CustomEffectsHeader>
     <CGET_SkinColor>Skin color</CGET_SkinColor>
     <CGET_HairColor>Hair color</CGET_HairColor>
-    <CGET_ColorPreviewLine>{0}: &lt;color=#{1}&gt;■&lt;/color&gt; RGB({2}, {3}, {4})  #{1}</CGET_ColorPreviewLine>
+    <CGET_ColorPreviewPrefix>{0}: </CGET_ColorPreviewPrefix>
+    <CGET_ColorPreviewSuffix>RGB({1}, {2}, {3})  #{0}</CGET_ColorPreviewSuffix>
     <CGET_OutputResult>Output: {0}</CGET_OutputResult>
 
     <CGET_EffectsHeader>&lt;b&gt;Effects&lt;/b&gt;</CGET_EffectsHeader>
@@ -87,6 +93,14 @@
     <CGET_OffsetWithPercent>{0} ({1}%)</CGET_OffsetWithPercent>
 
     <CGET_PendingGenesHeader>&lt;b&gt;Added genes&lt;/b&gt;: {0} (already exported in the mod: {1})</CGET_PendingGenesHeader>
+    <CGET_ManageExported>Manage</CGET_ManageExported>
+    <CGET_ManageExportedTip>View and delete the gene XML files that were already exported into this mod folder.</CGET_ManageExportedTip>
+    <CGET_NoExportedGenes>No genes have been exported to {0} yet.</CGET_NoExportedGenes>
+    <CGET_DeleteExportedTitle>Delete exported gene</CGET_DeleteExportedTitle>
+    <CGET_DeleteExportedConfirm>"{0}" has already been exported into the mod folder.\n\nDelete the XML file from disk as well?</CGET_DeleteExportedConfirm>
+    <CGET_DeleteExportedDone>Deleted: {0}</CGET_DeleteExportedDone>
+    <CGET_DeleteExportedFailed>Delete failed: {0}</CGET_DeleteExportedFailed>
+    <CGET_DeleteFileNotFound>File not found: {0}</CGET_DeleteFileNotFound>
     <CGET_TypeColumn>&lt;i&gt;Type&lt;/i&gt;</CGET_TypeColumn>
     <CGET_NoGenesAdded>(No genes added yet)</CGET_NoGenesAdded>
     <CGET_LoadedToEditor>Loaded into the editing area: {0}</CGET_LoadedToEditor>
@@ -99,9 +113,10 @@
     <CGET_GeneratedXml>Generated: &lt;{0}&gt;{1}&lt;/{0}&gt;</CGET_GeneratedXml>
 
     <CGET_NoGenesToExport>No genes to export (names cannot be empty).</CGET_NoGenesToExport>
-    <CGET_ExportSuccess>Exported {0} gene(s) to RimWorld\Mods\{1}</CGET_ExportSuccess>
-    <CGET_ExportSuccessSkipped>Exported {0} gene(s) to RimWorld\Mods\{1} (skipped {2} files with the same name)</CGET_ExportSuccessSkipped>
+    <CGET_ExportSuccess>Exported {0} gene(s) to RimWorld\Mods\{1},Please enable it in the Mod list and restart the game</CGET_ExportSuccess>
+    <CGET_ExportSuccessSkipped>Exported {0} gene(s) to RimWorld\Mods\{1} (skipped {2} files with the same name). Please enable it in the Mod list and restart the game</CGET_ExportSuccessSkipped>
     <CGET_ExportFailed>Export failed: {0}</CGET_ExportFailed>
+    <CGET_ExportNoPermission>No write permission for {0}. RimWorld is installed in Program Files - run the game as administrator, or move the game/mods folder to a writable drive.</CGET_ExportNoPermission>
 
     <CGET_DefaultModName>Custom Genes</CGET_DefaultModName>
     <CGET_DefaultModAuthor>Player</CGET_DefaultModAuthor>

@@ -3,11 +3,11 @@
     <CGET_MainMenuButton>自定义基因导出器</CGET_MainMenuButton>
 
     <CGET_ExportModInfo>导出模组信息</CGET_ExportModInfo>
-    <CGET_ModNameLabel>（必填）模组名称：</CGET_ModNameLabel>
-    <CGET_ModAuthorLabel>（必填）作者名称：</CGET_ModAuthorLabel>
-    <CGET_ModPackageIdLabel>（必填）PackageId：</CGET_ModPackageIdLabel>
-    <CGET_GeneDefNameLabel>（必填）DefName：</CGET_GeneDefNameLabel>
-    <CGET_GeneDescriptionLabel>（可选）基因描述：</CGET_GeneDescriptionLabel>
+    <CGET_ModNameLabel>[必填]模组名称：</CGET_ModNameLabel>
+    <CGET_ModAuthorLabel>[必填]作者名称：</CGET_ModAuthorLabel>
+    <CGET_ModPackageIdLabel>[必填]PackageId：</CGET_ModPackageIdLabel>
+    <CGET_GeneDefNameLabel>[必填]DefName：</CGET_GeneDefNameLabel>
+    <CGET_GeneDescriptionLabel>[可选]基因描述：</CGET_GeneDescriptionLabel>
 
     <CGET_GeneTypeLabel>选择基因类型：</CGET_GeneTypeLabel>
     <CGET_GeneTypeFunctional>功能基因</CGET_GeneTypeFunctional>
@@ -28,13 +28,13 @@
     <CGET_CategorySkin>外观 - 皮肤</CGET_CategorySkin>
     <CGET_CategoryHair>外观 - 毛发</CGET_CategoryHair>
 
-    <CGET_ExperimentalLabel>（可选）实验性：</CGET_ExperimentalLabel>
+    <CGET_ExperimentalLabel>[可选]实验性：</CGET_ExperimentalLabel>
     <CGET_SelectGeneClass>选择基因类</CGET_SelectGeneClass>
     <CGET_GeneClassFrom>{0}（来自：{1}）</CGET_GeneClassFrom>
     <CGET_Default>默认</CGET_Default>
     <CGET_CustomClassWarning1>注意：由于使用了自定义基因类，其他选项已禁用。</CGET_CustomClassWarning1>
     <CGET_CustomClassWarning2>因为自定义类通常包含了其专属的逻辑实现。</CGET_CustomClassWarning2>
-    <CGET_ExperimentalDebugLabel>（可选）实验性调试</CGET_ExperimentalDebugLabel>
+    <CGET_ExperimentalDebugLabel>[可选]实验性调试</CGET_ExperimentalDebugLabel>
     <CGET_ExperimentalDebugTip>开启后，属性加成和禁用需求的下拉菜单将显示游戏内包含模组在内的所有选项。</CGET_ExperimentalDebugTip>
 
     <CGET_DisableNeedsLabel>禁用需求：</CGET_DisableNeedsLabel>
@@ -43,19 +43,24 @@
     <CGET_StatFactorsLabel>属性加成（乘算）：</CGET_StatFactorsLabel>
     <CGET_StatOffsetsLabel>属性加成（加算）：</CGET_StatOffsetsLabel>
 
-    <CGET_IconPathLabel>（可选）自定义图标路径：</CGET_IconPathLabel>
-    <CGET_PreviewImagePathLabel>（可选）自定义预览图路径：</CGET_PreviewImagePathLabel>
+    <CGET_IconPathLabel>[可选]自定义图标路径：</CGET_IconPathLabel>
+    <CGET_IconFormatWarning>图标格式 {0} 游戏读不出来（请用 .png/.jpg），已改用默认图标。</CGET_IconFormatWarning>
+    <CGET_PreviewImagePathLabel>[可选]自定义预览图路径：</CGET_PreviewImagePathLabel>
     <CGET_AddToModList>添加到模组列表（{0} 个）</CGET_AddToModList>
     <CGET_ExportButton>导出</CGET_ExportButton>
 
     <CGET_PackageIdRequired>PackageId 不能为空。</CGET_PackageIdRequired>
+    <CGET_PackageIdInvalid>PackageId「{0}」格式不合法：只能用小写字母、数字、下划线和点，且至少包含一个点（例如 author.modname）。</CGET_PackageIdInvalid>
     <CGET_GeneNameRequired>基因名称不能为空。</CGET_GeneNameRequired>
+    <CGET_GeneNameInvalid>基因名 [{0}] 去掉空格和标点后是空的，无法生成 defName。</CGET_GeneNameInvalid>
     <CGET_GeneUpdated>已更新：{0}</CGET_GeneUpdated>
     <CGET_GeneAdded>已添加基因：{0}，当前共 {1} 个</CGET_GeneAdded>
+    <CGET_GeneAddedReset>已添加基因：{0}，当前共 {1} 个。编辑区已清空，可以继续做下一个基因。</CGET_GeneAddedReset>
     <CGET_UnsavedGeneConfirm>当前编辑区里的「{0}」还没有添加到列表，导出不会包含它。\n\n是否只导出列表里的 {1} 个基因？</CGET_UnsavedGeneConfirm>
     <CGET_Notice>注意</CGET_Notice>
     <CGET_DefNameConflict>以下基因的 defName 已经存在：\n\n{0}\n\n继续导出会覆盖对应的 XML 文件。是否覆盖？</CGET_DefNameConflict>
     <CGET_DefNameConflictTitle>DefName 重复</CGET_DefNameConflictTitle>
+    <CGET_DuplicateInOtherFolder>注意：这些基因在别的导出模组文件夹里已经存在。如果两个模组同时启用，游戏会报 defName 重复：\n\n{0}</CGET_DuplicateInOtherFolder>
 
     <CGET_DefaultPreviewInUse>（当前使用默认预览图）</CGET_DefaultPreviewInUse>
     <CGET_DefaultIcon>（默认图标）</CGET_DefaultIcon>
@@ -77,7 +82,8 @@
     <CGET_CustomEffectsHeader>自定义效果说明：</CGET_CustomEffectsHeader>
     <CGET_SkinColor>肤色</CGET_SkinColor>
     <CGET_HairColor>发色</CGET_HairColor>
-    <CGET_ColorPreviewLine>{0}：&lt;color=#{1}&gt;■&lt;/color&gt; RGB({2}, {3}, {4})  #{1}</CGET_ColorPreviewLine>
+    <CGET_ColorPreviewPrefix>{0}：</CGET_ColorPreviewPrefix>
+    <CGET_ColorPreviewSuffix>RGB({1}, {2}, {3})  #{0}</CGET_ColorPreviewSuffix>
     <CGET_OutputResult>输出结果：{0}</CGET_OutputResult>
 
     <CGET_EffectsHeader>&lt;b&gt;【影响】&lt;/b&gt;</CGET_EffectsHeader>
@@ -87,6 +93,14 @@
     <CGET_OffsetWithPercent>{0}（{1}%）</CGET_OffsetWithPercent>
 
     <CGET_PendingGenesHeader>&lt;b&gt;已添加的基因&lt;/b&gt;：{0} 个（模组里已导出 {1} 个）</CGET_PendingGenesHeader>
+    <CGET_ManageExported>管理</CGET_ManageExported>
+    <CGET_ManageExportedTip>查看并删除已经导出到这个模组文件夹里的基因 XML。</CGET_ManageExportedTip>
+    <CGET_NoExportedGenes>{0} 里还没有导出过基因。</CGET_NoExportedGenes>
+    <CGET_DeleteExportedTitle>删除已导出的基因</CGET_DeleteExportedTitle>
+    <CGET_DeleteExportedConfirm>「{0}」已经导出到模组文件夹。\n\n是否同时删除磁盘上的 XML 文件？</CGET_DeleteExportedConfirm>
+    <CGET_DeleteExportedDone>已删除：{0}</CGET_DeleteExportedDone>
+    <CGET_DeleteExportedFailed>删除失败：{0}</CGET_DeleteExportedFailed>
+    <CGET_DeleteFileNotFound>找不到文件：{0}</CGET_DeleteFileNotFound>
     <CGET_TypeColumn>&lt;i&gt;类型&lt;/i&gt;</CGET_TypeColumn>
     <CGET_NoGenesAdded>（还没有添加基因）</CGET_NoGenesAdded>
     <CGET_LoadedToEditor>已载入到左侧编辑区：{0}</CGET_LoadedToEditor>
@@ -99,9 +113,10 @@
     <CGET_GeneratedXml>生成：&lt;{0}&gt;{1}&lt;/{0}&gt;</CGET_GeneratedXml>
 
     <CGET_NoGenesToExport>没有可导出的基因（名称不能为空）。</CGET_NoGenesToExport>
-    <CGET_ExportSuccess>已导出 {0} 个基因至 RimWorld\Mods\{1}</CGET_ExportSuccess>
-    <CGET_ExportSuccessSkipped>已导出 {0} 个基因至 RimWorld\Mods\{1}（跳过 {2} 个同名文件）</CGET_ExportSuccessSkipped>
+    <CGET_ExportSuccess>已导出 {0} 个基因至 RimWorld\Mods\{1}，请在Mod列表启用并重启游戏</CGET_ExportSuccess>
+    <CGET_ExportSuccessSkipped>已导出 {0} 个基因至 RimWorld\Mods\{1}（跳过 {2} 个同名文件），请在Mod列表启用并重启游戏</CGET_ExportSuccessSkipped>
     <CGET_ExportFailed>导出失败：{0}</CGET_ExportFailed>
+    <CGET_ExportNoPermission>没有写入 {0} 的权限。游戏装在 Program Files 下时需要用管理员身份运行游戏，或把游戏/Mods 文件夹放到可写磁盘。</CGET_ExportNoPermission>
 
     <CGET_DefaultModName>自定义基因</CGET_DefaultModName>
     <CGET_DefaultModAuthor>玩家</CGET_DefaultModAuthor>
