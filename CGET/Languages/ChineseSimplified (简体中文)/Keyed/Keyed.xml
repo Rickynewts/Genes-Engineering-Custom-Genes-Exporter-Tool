@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+    <CGET_MainMenuButton>自定义基因导出器</CGET_MainMenuButton>
+
+    <CGET_ExportModInfo>导出模组信息</CGET_ExportModInfo>
+    <CGET_ModNameLabel>（必填）模组名称：</CGET_ModNameLabel>
+    <CGET_ModAuthorLabel>（必填）作者名称：</CGET_ModAuthorLabel>
+    <CGET_ModPackageIdLabel>（必填）PackageId：</CGET_ModPackageIdLabel>
+    <CGET_GeneDefNameLabel>（必填）DefName：</CGET_GeneDefNameLabel>
+    <CGET_GeneDescriptionLabel>（可选）基因描述：</CGET_GeneDescriptionLabel>
+
+    <CGET_GeneTypeLabel>选择基因类型：</CGET_GeneTypeLabel>
+    <CGET_GeneTypeFunctional>功能基因</CGET_GeneTypeFunctional>
+    <CGET_GeneTypeSkin>皮肤基因</CGET_GeneTypeSkin>
+    <CGET_GeneTypeHair>发色基因</CGET_GeneTypeHair>
+    <CGET_GeneTypeShortFunctional>功能</CGET_GeneTypeShortFunctional>
+    <CGET_GeneTypeShortSkin>皮肤</CGET_GeneTypeShortSkin>
+    <CGET_GeneTypeShortHair>发色</CGET_GeneTypeShortHair>
+
+    <CGET_MetabolismLine>代谢率：{0}</CGET_MetabolismLine>
+    <CGET_ComplexityLine>复杂度：{0}</CGET_ComplexityLine>
+
+    <CGET_CategoryLabel>基因分类（显示分类）：</CGET_CategoryLabel>
+    <CGET_DefaultCategory>自定义基因</CGET_DefaultCategory>
+    <CGET_CategoryDefault>{0}（默认）</CGET_CategoryDefault>
+    <CGET_SkinCategoryDefault>外观 - 皮肤（默认）</CGET_SkinCategoryDefault>
+    <CGET_HairCategoryDefault>外观 - 毛发（默认）</CGET_HairCategoryDefault>
+    <CGET_CategorySkin>外观 - 皮肤</CGET_CategorySkin>
+    <CGET_CategoryHair>外观 - 毛发</CGET_CategoryHair>
+
+    <CGET_ExperimentalLabel>（可选）实验性：</CGET_ExperimentalLabel>
+    <CGET_SelectGeneClass>选择基因类</CGET_SelectGeneClass>
+    <CGET_GeneClassFrom>{0}（来自：{1}）</CGET_GeneClassFrom>
+    <CGET_Default>默认</CGET_Default>
+    <CGET_CustomClassWarning1>注意：由于使用了自定义基因类，其他选项已禁用。</CGET_CustomClassWarning1>
+    <CGET_CustomClassWarning2>因为自定义类通常包含了其专属的逻辑实现。</CGET_CustomClassWarning2>
+    <CGET_ExperimentalDebugLabel>（可选）实验性调试</CGET_ExperimentalDebugLabel>
+    <CGET_ExperimentalDebugTip>开启后，属性加成和禁用需求的下拉菜单将显示游戏内包含模组在内的所有选项。</CGET_ExperimentalDebugTip>
+
+    <CGET_DisableNeedsLabel>禁用需求：</CGET_DisableNeedsLabel>
+    <CGET_Add>添加</CGET_Add>
+    <CGET_Delete>删除</CGET_Delete>
+    <CGET_StatFactorsLabel>属性加成（乘算）：</CGET_StatFactorsLabel>
+    <CGET_StatOffsetsLabel>属性加成（加算）：</CGET_StatOffsetsLabel>
+
+    <CGET_IconPathLabel>（可选）自定义图标路径：</CGET_IconPathLabel>
+    <CGET_PreviewImagePathLabel>（可选）自定义预览图路径：</CGET_PreviewImagePathLabel>
+    <CGET_AddToModList>添加到模组列表（{0} 个）</CGET_AddToModList>
+    <CGET_ExportButton>导出</CGET_ExportButton>
+
+    <CGET_PackageIdRequired>PackageId 不能为空。</CGET_PackageIdRequired>
+    <CGET_GeneNameRequired>基因名称不能为空。</CGET_GeneNameRequired>
+    <CGET_GeneUpdated>已更新：{0}</CGET_GeneUpdated>
+    <CGET_GeneAdded>已添加基因：{0}，当前共 {1} 个</CGET_GeneAdded>
+    <CGET_UnsavedGeneConfirm>当前编辑区里的「{0}」还没有添加到列表，导出不会包含它。\n\n是否只导出列表里的 {1} 个基因？</CGET_UnsavedGeneConfirm>
+    <CGET_Notice>注意</CGET_Notice>
+    <CGET_DefNameConflict>以下基因的 defName 已经存在：\n\n{0}\n\n继续导出会覆盖对应的 XML 文件。是否覆盖？</CGET_DefNameConflict>
+    <CGET_DefNameConflictTitle>DefName 重复</CGET_DefNameConflictTitle>
+
+    <CGET_DefaultPreviewInUse>（当前使用默认预览图）</CGET_DefaultPreviewInUse>
+    <CGET_DefaultIcon>（默认图标）</CGET_DefaultIcon>
+    <CGET_VanillaHairIcon>（原版发色图标）</CGET_VanillaHairIcon>
+    <CGET_VanillaSkinIcon>（原版肤色图标）</CGET_VanillaSkinIcon>
+
+    <CGET_ExportedModInfoHeader>&lt;b&gt;【导出的模组信息】&lt;/b&gt;</CGET_ExportedModInfoHeader>
+    <CGET_GeneInfoPreviewHeader>&lt;b&gt;【基因信息预览】&lt;/b&gt;</CGET_GeneInfoPreviewHeader>
+    <CGET_LineName>名称：{0}</CGET_LineName>
+    <CGET_LineAuthor>作者：{0}</CGET_LineAuthor>
+    <CGET_LinePackageId>PackageId：{0}</CGET_LinePackageId>
+    <CGET_LineDescription>描述：{0}</CGET_LineDescription>
+    <CGET_LineCategory>分类：{0}</CGET_LineCategory>
+    <CGET_LineGeneType>基因类型：{0}</CGET_LineGeneType>
+    <CGET_Unnamed>未命名</CGET_Unnamed>
+    <CGET_NoDescription>无描述</CGET_NoDescription>
+    <CGET_LineGeneClass>基因类：{0}</CGET_LineGeneClass>
+    <CGET_LineSourceMod>来源模组：{0}</CGET_LineSourceMod>
+    <CGET_CustomEffectsHeader>自定义效果说明：</CGET_CustomEffectsHeader>
+    <CGET_SkinColor>肤色</CGET_SkinColor>
+    <CGET_HairColor>发色</CGET_HairColor>
+    <CGET_ColorPreviewLine>{0}：&lt;color=#{1}&gt;■&lt;/color&gt; RGB({2}, {3}, {4})  #{1}</CGET_ColorPreviewLine>
+    <CGET_OutputResult>输出结果：{0}</CGET_OutputResult>
+
+    <CGET_EffectsHeader>&lt;b&gt;【影响】&lt;/b&gt;</CGET_EffectsHeader>
+    <CGET_RemovesNeed>• 移除「{0}」需求</CGET_RemovesNeed>
+    <CGET_NoEffects>• 无明显效果</CGET_NoEffects>
+    <CGET_ColorCarrierLine>• 这种基因的携带者肤色为 #{0}</CGET_ColorCarrierLine>
+    <CGET_OffsetWithPercent>{0}（{1}%）</CGET_OffsetWithPercent>
+
+    <CGET_PendingGenesHeader>&lt;b&gt;已添加的基因&lt;/b&gt;：{0} 个（模组里已导出 {1} 个）</CGET_PendingGenesHeader>
+    <CGET_TypeColumn>&lt;i&gt;类型&lt;/i&gt;</CGET_TypeColumn>
+    <CGET_NoGenesAdded>（还没有添加基因）</CGET_NoGenesAdded>
+    <CGET_LoadedToEditor>已载入到左侧编辑区：{0}</CGET_LoadedToEditor>
+    <CGET_ClickToLoadTip>点击载入到左侧编辑区</CGET_ClickToLoadTip>
+    <CGET_SkinPaletteHeader>&lt;b&gt;肤色调色板&lt;/b&gt;：同步到输入框</CGET_SkinPaletteHeader>
+    <CGET_HairPaletteHeader>&lt;b&gt;发色调色板&lt;/b&gt;：同步到输入框</CGET_HairPaletteHeader>
+
+    <CGET_ColorOverride>{0}覆盖（{1}）</CGET_ColorOverride>
+    <CGET_EnterRgb>输入 RGB 数值（0-255）：</CGET_EnterRgb>
+    <CGET_GeneratedXml>生成：&lt;{0}&gt;{1}&lt;/{0}&gt;</CGET_GeneratedXml>
+
+    <CGET_NoGenesToExport>没有可导出的基因（名称不能为空）。</CGET_NoGenesToExport>
+    <CGET_ExportSuccess>已导出 {0} 个基因至 RimWorld\Mods\{1}</CGET_ExportSuccess>
+    <CGET_ExportSuccessSkipped>已导出 {0} 个基因至 RimWorld\Mods\{1}（跳过 {2} 个同名文件）</CGET_ExportSuccessSkipped>
+    <CGET_ExportFailed>导出失败：{0}</CGET_ExportFailed>
+
+    <CGET_DefaultModName>自定义基因</CGET_DefaultModName>
+    <CGET_DefaultModAuthor>玩家</CGET_DefaultModAuthor>
+    <CGET_DefaultModDescription>导出的自定义基因存储。</CGET_DefaultModDescription>
+</LanguageData>

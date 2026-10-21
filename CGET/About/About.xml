@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+    <name>Genes Engineering:Custom Genes Exporter Tool</name>
+    <author>Yushiren</author>
+    <packageId>Yushiren.GenesEngineering</packageId>
+	<supportedVersions>
+		<li>1.6</li>
+		<li>1.7</li>
+	</supportedVersions>
+	 <description><![CDATA[Genes Engineering:Custom Genes Exporter Tool是一款自定义基因导出器：
+<color=#7a9dab>支持一键导出功能，外观基因结构完整的本地XML Mod文件，内置RGB调色板和多种实验性功能。</color>
+▸推荐排序：
+↳Harmony
+↳Core
+↳Genes Engineering:Custom Genes Exporter Tool
+推荐搭配使用的Mod:
+↳[1.5-1.6] Custom Xenotype Exporter Tool
+↳[Fork] Xenotype And Ideology Buttons TitleScreen
+↳Xenotype Summary
+▸语言：简体中文
+英语
+▸反馈：
+]]></description>
+</ModMetaData>
