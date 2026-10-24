@@ -35,9 +35,11 @@
     <CGET_CustomClassWarning1>Note: Other options are disabled because a custom gene class is used.</CGET_CustomClassWarning1>
     <CGET_CustomClassWarning2>Custom classes usually include their own logic.</CGET_CustomClassWarning2>
     <CGET_ExperimentalDebugLabel>[Optional] Experimental debug</CGET_ExperimentalDebugLabel>
-    <CGET_ExperimentalDebugTip>When enabled, the stat and need dropdowns show all options in the game, including modded ones.</CGET_ExperimentalDebugTip>
+    <CGET_ExperimentalDebugTip>When enabled, the stat, need and trait dropdowns show all options in the game, including modded ones.</CGET_ExperimentalDebugTip>
 
     <CGET_DisableNeedsLabel>Disable needs:</CGET_DisableNeedsLabel>
+    <CGET_ForcedTraitsLabel>Forced traits:</CGET_ForcedTraitsLabel>
+    <CGET_SuppressedTraitsLabel>Suppressed traits:</CGET_SuppressedTraitsLabel>
     <CGET_Add>Add</CGET_Add>
     <CGET_Delete>Delete</CGET_Delete>
     <CGET_StatFactorsLabel>Stat factors:</CGET_StatFactorsLabel>
@@ -88,6 +90,8 @@
 
     <CGET_EffectsHeader>&lt;b&gt;Effects&lt;/b&gt;</CGET_EffectsHeader>
     <CGET_RemovesNeed>• Removes the {0} need</CGET_RemovesNeed>
+    <CGET_ForcedTraitLine>• Forces trait: {0}</CGET_ForcedTraitLine>
+    <CGET_SuppressedTraitLine>• Suppresses trait: {0}</CGET_SuppressedTraitLine>
     <CGET_NoEffects>• No notable effects</CGET_NoEffects>
     <CGET_ColorCarrierLine>• Carriers of this gene have skin color #{0}</CGET_ColorCarrierLine>
     <CGET_OffsetWithPercent>{0} ({1}%)</CGET_OffsetWithPercent>
@@ -121,4 +125,12 @@
     <CGET_DefaultModName>Custom Genes</CGET_DefaultModName>
     <CGET_DefaultModAuthor>Player</CGET_DefaultModAuthor>
     <CGET_DefaultModDescription>Exported custom genes storage.</CGET_DefaultModDescription>
+
+    <!-- Gene background style switcher (visual only, does not affect export) -->
+    <CGET_BackgroundStyleLabel>Background style</CGET_BackgroundStyleLabel>
+    <CGET_BackgroundStyleTip>Changes the icon background appearance only. Does not affect exported genes.</CGET_BackgroundStyleTip>
+
+    <CGET_BackgroundDefault>Default</CGET_BackgroundDefault>
+    <CGET_BackgroundArchite>Archite</CGET_BackgroundArchite>
+    <CGET_BackgroundEndogene>Endogene</CGET_BackgroundEndogene>
 </LanguageData>

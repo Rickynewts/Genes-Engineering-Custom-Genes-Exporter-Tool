@@ -42,6 +42,10 @@ namespace CustomGeneExporter
         public List<StatModifier> StatFactors = new List<StatModifier>();
         public List<StatModifier> StatOffsets = new List<StatModifier>();
 
+        //强制获得 / 强制抑制的特性
+        public List<TraitDef> ForcedTraits = new List<TraitDef>();
+        public List<TraitDef> SuppressedTraits = new List<TraitDef>();
+
         //导出时算出来的图标路径
         public string ResolvedIconPath;
     }
@@ -546,7 +550,8 @@ namespace CustomGeneExporter
                         }
 
                         GenerateGeneDefFile(defsFolder, gene.Name, gene.Description ?? "", gene.Metabolism, gene.Complexity,
-                            gene.DisablesNeeds, gene.StatFactors, gene.StatOffsets, gene.ResolvedIconPath,
+                            gene.DisablesNeeds, gene.StatFactors, gene.StatOffsets,
+                            gene.ForcedTraits, gene.SuppressedTraits, gene.ResolvedIconPath,
                             gene.GeneClass, gene.GeneClassMod, categoryDefName, gene.Category, cleanPackageId);
                     }
 
@@ -642,6 +647,26 @@ namespace CustomGeneExporter
                         if (offset != null && offset.stat != null)
                         {
                             AddMod(mods, offset.stat.modContentPack);
+                        }
+                    }
+                }
+                if (gene.ForcedTraits != null)
+                {
+                    foreach (TraitDef trait in gene.ForcedTraits)
+                    {
+                        if (trait != null)
+                        {
+                            AddMod(mods, trait.modContentPack);
+                        }
+                    }
+                }
+                if (gene.SuppressedTraits != null)
+                {
+                    foreach (TraitDef trait in gene.SuppressedTraits)
+                    {
+                        if (trait != null)
+                        {
+                            AddMod(mods, trait.modContentPack);
                         }
                     }
                 }
@@ -1129,7 +1154,8 @@ namespace CustomGeneExporter
 
         private static void GenerateGeneDefFile(
     string defsFolder, string name, string desc, int met, int cpx,
-    List<NeedDef> disablesNeeds, List<StatModifier> factors, List<StatModifier> offsets, string iconPath,
+    List<NeedDef> disablesNeeds, List<StatModifier> factors, List<StatModifier> offsets,
+    List<TraitDef> forcedTraits, List<TraitDef> suppressedTraits, string iconPath,
     Type selectedGeneClass, ModContentPack selectedGeneClassMod,
             string categoryDefName, GeneCategoryDef selectedCategory, string ownPackageId)
         {
@@ -1199,6 +1225,10 @@ namespace CustomGeneExporter
                     }
                 }
 
+                //强制获得 / 强制抑制特性
+                AddGeneticTraitList(geneDef, "forcedTraits", forcedTraits);
+                AddGeneticTraitList(geneDef, "suppressedTraits", suppressedTraits);
+
                 // 乘算节点
                 if (factors != null && factors.Count > 0)
                 {
@@ -1264,6 +1294,40 @@ namespace CustomGeneExporter
         {
             //格式
             return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+
+        // 特性列表：<forcedTraits><li><def>Kind</def></li></forcedTraits>
+        // 注意 GeneDef 的这两个字段是 List<GeneticTraitData>，XML 里每项要写成 <li><def>特性defName</def></li>
+        private static void AddGeneticTraitList(XElement geneDef, string elementName, List<TraitDef> traits)
+        {
+            if (traits == null || traits.Count == 0)
+            {
+                return;
+            }
+
+            XElement list = new XElement(elementName);
+            foreach (TraitDef trait in traits)
+            {
+                if (trait == null || string.IsNullOrEmpty(trait.defName))
+                {
+                    continue;
+                }
+
+                XElement li = new XElement("li",
+                    new XElement("def", trait.defName));
+
+                if (trait.modContentPack != null && !trait.modContentPack.IsCoreMod)
+                {
+                    li.Add(new XAttribute("MayRequire", trait.modContentPack.PackageId));
+                }
+
+                list.Add(li);
+            }
+
+            if (list.HasElements)
+            {
+                geneDef.Add(list);
+            }
         }
     }
 }

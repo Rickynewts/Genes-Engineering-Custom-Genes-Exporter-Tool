@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+    <CGET_MainMenuButton>Custom Genes Exporter</CGET_MainMenuButton>
+
+    <CGET_ExportModInfo>Export mod info</CGET_ExportModInfo>
+    <CGET_ModNameLabel>[Required] Mod name:</CGET_ModNameLabel>
+    <CGET_ModAuthorLabel>[Required] Author:</CGET_ModAuthorLabel>
+    <CGET_ModPackageIdLabel>[Required] PackageId:</CGET_ModPackageIdLabel>
+    <CGET_GeneDefNameLabel>[Required] DefName:</CGET_GeneDefNameLabel>
+    <CGET_GeneDescriptionLabel>[Optional] Gene description:</CGET_GeneDescriptionLabel>
+
+    <CGET_GeneTypeLabel>Select gene type:</CGET_GeneTypeLabel>
+    <CGET_GeneTypeFunctional>Functional gene</CGET_GeneTypeFunctional>
+    <CGET_GeneTypeSkin>Skin color gene</CGET_GeneTypeSkin>
+    <CGET_GeneTypeHair>Hair color gene</CGET_GeneTypeHair>
+    <CGET_GeneTypeShortFunctional>Function</CGET_GeneTypeShortFunctional>
+    <CGET_GeneTypeShortSkin>Skin</CGET_GeneTypeShortSkin>
+    <CGET_GeneTypeShortHair>Hair</CGET_GeneTypeShortHair>
+
+    <CGET_MetabolismLine>Metabolism: {0}</CGET_MetabolismLine>
+    <CGET_ComplexityLine>Complexity: {0}</CGET_ComplexityLine>
+
+    <CGET_CategoryLabel>Gene category (display category):</CGET_CategoryLabel>
+    <CGET_DefaultCategory>Custom genes</CGET_DefaultCategory>
+    <CGET_CategoryDefault>{0} (default)</CGET_CategoryDefault>
+    <CGET_SkinCategoryDefault>Cosmetic_Skin (default)</CGET_SkinCategoryDefault>
+    <CGET_HairCategoryDefault>Cosmetic_Hair (default)</CGET_HairCategoryDefault>
+    <CGET_CategorySkin>Cosmetic_Skin</CGET_CategorySkin>
+    <CGET_CategoryHair>Cosmetic_Hair</CGET_CategoryHair>
+
+    <CGET_ExperimentalLabel>[Optional] Experimental:</CGET_ExperimentalLabel>
+    <CGET_SelectGeneClass>Select gene class</CGET_SelectGeneClass>
+    <CGET_GeneClassFrom>{0} (from: {1})</CGET_GeneClassFrom>
+    <CGET_Default>Default</CGET_Default>
+    <CGET_CustomClassWarning1>Note: Other options are disabled because a custom gene class is used.</CGET_CustomClassWarning1>
+    <CGET_CustomClassWarning2>Custom classes usually include their own logic.</CGET_CustomClassWarning2>
+    <CGET_ExperimentalDebugLabel>[Optional] Experimental debug</CGET_ExperimentalDebugLabel>
+    <CGET_ExperimentalDebugTip>When enabled, the stat, need and trait dropdowns show all options in the game, including modded ones.</CGET_ExperimentalDebugTip>
+
+    <CGET_DisableNeedsLabel>Disable needs:</CGET_DisableNeedsLabel>
+    <CGET_ForcedTraitsLabel>Forced traits:</CGET_ForcedTraitsLabel>
+    <CGET_SuppressedTraitsLabel>Suppressed traits:</CGET_SuppressedTraitsLabel>
+    <CGET_Add>Add</CGET_Add>
+    <CGET_Delete>Delete</CGET_Delete>
+    <CGET_StatFactorsLabel>Stat factors:</CGET_StatFactorsLabel>
+    <CGET_StatOffsetsLabel>Stat offsets:</CGET_StatOffsetsLabel>
+
+    <CGET_IconPathLabel>[Optional] Custom icon path:</CGET_IconPathLabel>
+    <CGET_IconFormatWarning>Icon format {0} is not supported by the game (use .png/.jpg). The default icon is used instead.</CGET_IconFormatWarning>
+    <CGET_PreviewImagePathLabel>[Optional] Custom preview image path:</CGET_PreviewImagePathLabel>
+    <CGET_AddToModList>Add to mod list ({0})</CGET_AddToModList>
+    <CGET_ExportButton>Export</CGET_ExportButton>
+
+    <CGET_PackageIdRequired>PackageId cannot be empty.</CGET_PackageIdRequired>
+    <CGET_PackageIdInvalid>PackageId "{0}" is not valid. Use lowercase letters, digits, underscores and at least one dot (for example author.modname).</CGET_PackageIdInvalid>
+    <CGET_GeneNameRequired>Gene name cannot be empty.</CGET_GeneNameRequired>
+    <CGET_GeneNameInvalid>The gene name(s) [{0}] contain no usable characters after removing spaces and punctuation, so the defName would be empty.</CGET_GeneNameInvalid>
+    <CGET_GeneUpdated>Updated: {0}</CGET_GeneUpdated>
+    <CGET_GeneAdded>Added gene: {0} ({1} total)</CGET_GeneAdded>
+    <CGET_GeneAddedReset>Added gene: {0} ({1} total). The editing area has been cleared for the next gene.</CGET_GeneAddedReset>
+    <CGET_UnsavedGeneConfirm>The gene "{0}" in the editing area has not been added to the list, so it will not be included in the export.\n\nExport only the {1} genes in the list?</CGET_UnsavedGeneConfirm>
+    <CGET_Notice>Notice</CGET_Notice>
+    <CGET_DefNameConflict>The following gene defNames already exist:\n\n{0}\n\nContinuing will overwrite the corresponding XML files. Overwrite?</CGET_DefNameConflict>
+    <CGET_DefNameConflictTitle>Duplicate DefName</CGET_DefNameConflictTitle>
+    <CGET_DuplicateInOtherFolder>Warning: these genes already exist in another exported mod folder. If both mods are enabled, the game will report duplicate defNames:\n\n{0}</CGET_DuplicateInOtherFolder>
+
+    <CGET_DefaultPreviewInUse>(Using the default preview image)</CGET_DefaultPreviewInUse>
+    <CGET_DefaultIcon>(Default icon)</CGET_DefaultIcon>
+    <CGET_VanillaHairIcon>(Vanilla hair color icon)</CGET_VanillaHairIcon>
+    <CGET_VanillaSkinIcon>(Vanilla skin color icon)</CGET_VanillaSkinIcon>
+
+    <CGET_ExportedModInfoHeader>&lt;b&gt;Exported mod info&lt;/b&gt;</CGET_ExportedModInfoHeader>
+    <CGET_GeneInfoPreviewHeader>&lt;b&gt;Gene info preview&lt;/b&gt;</CGET_GeneInfoPreviewHeader>
+    <CGET_LineName>Name: {0}</CGET_LineName>
+    <CGET_LineAuthor>Author: {0}</CGET_LineAuthor>
+    <CGET_LinePackageId>PackageId: {0}</CGET_LinePackageId>
+    <CGET_LineDescription>Description: {0}</CGET_LineDescription>
+    <CGET_LineCategory>Category: {0}</CGET_LineCategory>
+    <CGET_LineGeneType>Gene type: {0}</CGET_LineGeneType>
+    <CGET_Unnamed>Unnamed</CGET_Unnamed>
+    <CGET_NoDescription>No description</CGET_NoDescription>
+    <CGET_LineGeneClass>Gene class: {0}</CGET_LineGeneClass>
+    <CGET_LineSourceMod>Source mod: {0}</CGET_LineSourceMod>
+    <CGET_CustomEffectsHeader>Custom effect descriptions:</CGET_CustomEffectsHeader>
+    <CGET_SkinColor>Skin color</CGET_SkinColor>
+    <CGET_HairColor>Hair color</CGET_HairColor>
+    <CGET_ColorPreviewPrefix>{0}: </CGET_ColorPreviewPrefix>
+    <CGET_ColorPreviewSuffix>RGB({1}, {2}, {3})  #{0}</CGET_ColorPreviewSuffix>
+    <CGET_OutputResult>Output: {0}</CGET_OutputResult>
+
+    <CGET_EffectsHeader>&lt;b&gt;Effects&lt;/b&gt;</CGET_EffectsHeader>
+    <CGET_RemovesNeed>• Removes the {0} need</CGET_RemovesNeed>
+    <CGET_ForcedTraitLine>• Forces trait: {0}</CGET_ForcedTraitLine>
+    <CGET_SuppressedTraitLine>• Suppresses trait: {0}</CGET_SuppressedTraitLine>
+    <CGET_NoEffects>• No notable effects</CGET_NoEffects>
+    <CGET_ColorCarrierLine>• Carriers of this gene have skin color #{0}</CGET_ColorCarrierLine>
+    <CGET_OffsetWithPercent>{0} ({1}%)</CGET_OffsetWithPercent>
+
+    <CGET_PendingGenesHeader>&lt;b&gt;Added genes&lt;/b&gt;: {0} (already exported in the mod: {1})</CGET_PendingGenesHeader>
+    <CGET_ManageExported>Manage</CGET_ManageExported>
+    <CGET_ManageExportedTip>View and delete the gene XML files that were already exported into this mod folder.</CGET_ManageExportedTip>
+    <CGET_NoExportedGenes>No genes have been exported to {0} yet.</CGET_NoExportedGenes>
+    <CGET_DeleteExportedTitle>Delete exported gene</CGET_DeleteExportedTitle>
+    <CGET_DeleteExportedConfirm>"{0}" has already been exported into the mod folder.\n\nDelete the XML file from disk as well?</CGET_DeleteExportedConfirm>
+    <CGET_DeleteExportedDone>Deleted: {0}</CGET_DeleteExportedDone>
+    <CGET_DeleteExportedFailed>Delete failed: {0}</CGET_DeleteExportedFailed>
+    <CGET_DeleteFileNotFound>File not found: {0}</CGET_DeleteFileNotFound>
+    <CGET_TypeColumn>&lt;i&gt;Type&lt;/i&gt;</CGET_TypeColumn>
+    <CGET_NoGenesAdded>(No genes added yet)</CGET_NoGenesAdded>
+    <CGET_LoadedToEditor>Loaded into the editing area: {0}</CGET_LoadedToEditor>
+    <CGET_ClickToLoadTip>Click to load into the editing area</CGET_ClickToLoadTip>
+    <CGET_SkinPaletteHeader>&lt;b&gt;Skin color palette&lt;/b&gt;: syncs to the RGB fields</CGET_SkinPaletteHeader>
+    <CGET_HairPaletteHeader>&lt;b&gt;Hair color palette&lt;/b&gt;: syncs to the RGB fields</CGET_HairPaletteHeader>
+
+    <CGET_ColorOverride>{0} override ({1})</CGET_ColorOverride>
+    <CGET_EnterRgb>Enter RGB values (0-255):</CGET_EnterRgb>
+    <CGET_GeneratedXml>Generated: &lt;{0}&gt;{1}&lt;/{0}&gt;</CGET_GeneratedXml>
+
+    <CGET_NoGenesToExport>No genes to export (names cannot be empty).</CGET_NoGenesToExport>
+    <CGET_ExportSuccess>Exported {0} gene(s) to RimWorld\Mods\{1},Please enable it in the Mod list and restart the game</CGET_ExportSuccess>
+    <CGET_ExportSuccessSkipped>Exported {0} gene(s) to RimWorld\Mods\{1} (skipped {2} files with the same name). Please enable it in the Mod list and restart the game</CGET_ExportSuccessSkipped>
+    <CGET_ExportFailed>Export failed: {0}</CGET_ExportFailed>
+    <CGET_ExportNoPermission>No write permission for {0}. RimWorld is installed in Program Files - run the game as administrator, or move the game/mods folder to a writable drive.</CGET_ExportNoPermission>
+
+    <CGET_DefaultModName>Custom Genes</CGET_DefaultModName>
+    <CGET_DefaultModAuthor>Player</CGET_DefaultModAuthor>
+    <CGET_DefaultModDescription>Exported custom genes storage.</CGET_DefaultModDescription>
+</LanguageData>

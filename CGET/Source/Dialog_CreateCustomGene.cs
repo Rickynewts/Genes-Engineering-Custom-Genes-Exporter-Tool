@@ -30,6 +30,9 @@ namespace CustomGeneExporter
         private bool experimentalDebugMode = false;
         //列表数据
         private List<NeedDef> disablesNeedsList = new List<NeedDef>();
+        //强制获得 / 强制抑制的特性
+        private List<TraitDef> forcedTraitsList = new List<TraitDef>();
+        private List<TraitDef> suppressedTraitsList = new List<TraitDef>();
         private List<StatModifier> statFactors = new List<StatModifier>();//乘算
         private List<StatModifier> statOffsets = new List<StatModifier>(); //加算 
 
@@ -136,6 +139,51 @@ namespace CustomGeneExporter
 
             // 其他保留
             return true;
+        }
+
+        // 特性候选：默认只显示原版（Core + 官方 DLC），开启实验性调试后显示全部（含模组）
+        private IEnumerable<TraitDef> GetSelectableTraits(bool suppressMode)
+        {
+            foreach (TraitDef trait in DefDatabase<TraitDef>.AllDefsListForReading)
+            {
+                if (trait == null)
+                {
+                    continue;
+                }
+                if (!experimentalDebugMode)
+                {
+                    if (trait.modContentPack == null
+                        || (!trait.modContentPack.IsCoreMod && !trait.modContentPack.IsOfficialMod))
+                    {
+                        continue;
+                    }
+                }
+                //原版没设置过 canBeSuppressed 的默认是 true，设成 false 的特性不能进抑制列表
+                if (suppressMode && !trait.canBeSuppressed)
+                {
+                    continue;
+                }
+                yield return trait;
+            }
+        }
+
+        // 特性显示名：优先 TraitDef.label，没有就用第一个 degree 的 label
+        private static string GetTraitLabel(TraitDef trait)
+        {
+            if (trait == null)
+            {
+                return "";
+            }
+            if (!string.IsNullOrEmpty(trait.label))
+            {
+                return trait.label;
+            }
+            if (trait.degreeDatas != null && trait.degreeDatas.Count > 0
+                && !string.IsNullOrEmpty(trait.degreeDatas[0].label))
+            {
+                return trait.degreeDatas[0].label;
+            }
+            return trait.defName;
         }
 
         public override Vector2 InitialSize => new Vector2(900f, 700f);
@@ -444,6 +492,73 @@ namespace CustomGeneExporter
                 }
 
                 listing.GapLine();
+                //强制获得特性
+                listing.Label("CGET_ForcedTraitsLabel".Translate());
+                if (listing.ButtonText("CGET_Add".Translate()))
+                {
+                    List<FloatMenuOption> options = new List<FloatMenuOption>();
+                    foreach (TraitDef traitDef in GetSelectableTraits(false).OrderBy(x => GetTraitLabel(x)))
+                    {
+                        TraitDef captured = traitDef;
+                        options.Add(new FloatMenuOption(GetTraitLabel(captured), delegate
+                        {
+                            if (!forcedTraitsList.Contains(captured))
+                            {
+                                forcedTraitsList.Add(captured);
+                            }
+                            //同一个特性不能既强制又抑制
+                            suppressedTraitsList.Remove(captured);
+                        }));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+
+                for (int i = 0; i < forcedTraitsList.Count; i++)
+                {
+                    TraitDef trait = forcedTraitsList[i];
+                    Rect rowRect = listing.GetRect(30f);
+                    Widgets.Label(new Rect(rowRect.x, rowRect.y, 300f, 30f), GetTraitLabel(trait));
+                    if (Widgets.ButtonText(new Rect(rowRect.x + 320f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                    {
+                        forcedTraitsList.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                listing.GapLine();
+                //强制抑制特性
+                listing.Label("CGET_SuppressedTraitsLabel".Translate());
+                if (listing.ButtonText("CGET_Add".Translate()))
+                {
+                    List<FloatMenuOption> options = new List<FloatMenuOption>();
+                    foreach (TraitDef traitDef in GetSelectableTraits(true).OrderBy(x => GetTraitLabel(x)))
+                    {
+                        TraitDef captured = traitDef;
+                        options.Add(new FloatMenuOption(GetTraitLabel(captured), delegate
+                        {
+                            if (!suppressedTraitsList.Contains(captured))
+                            {
+                                suppressedTraitsList.Add(captured);
+                            }
+                            forcedTraitsList.Remove(captured);
+                        }));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+
+                for (int i = 0; i < suppressedTraitsList.Count; i++)
+                {
+                    TraitDef trait = suppressedTraitsList[i];
+                    Rect rowRect = listing.GetRect(30f);
+                    Widgets.Label(new Rect(rowRect.x, rowRect.y, 300f, 30f), GetTraitLabel(trait));
+                    if (Widgets.ButtonText(new Rect(rowRect.x + 320f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                    {
+                        suppressedTraitsList.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                listing.GapLine();
                 //StatFactors列表（只有倍率型属性：defaultBaseValue = 1）
                 listing.Label("CGET_StatFactorsLabel".Translate());
                 if (listing.ButtonText("CGET_Add".Translate()))
@@ -571,6 +686,8 @@ namespace CustomGeneExporter
             spec.GeneClassMod = selectedGeneClassMod;
 
             spec.DisablesNeeds.AddRange(disablesNeedsList);
+            spec.ForcedTraits.AddRange(forcedTraitsList);
+            spec.SuppressedTraits.AddRange(suppressedTraitsList);
             foreach (StatModifier factor in statFactors)
             {
                 if (factor != null && factor.stat != null)
@@ -612,6 +729,11 @@ namespace CustomGeneExporter
 
             disablesNeedsList.Clear();
             disablesNeedsList.AddRange(spec.DisablesNeeds);
+
+            forcedTraitsList.Clear();
+            forcedTraitsList.AddRange(spec.ForcedTraits);
+            suppressedTraitsList.Clear();
+            suppressedTraitsList.AddRange(spec.SuppressedTraits);
 
             statFactors.Clear();
             foreach (StatModifier factor in spec.StatFactors)
@@ -669,6 +791,8 @@ namespace CustomGeneExporter
             selectedGeneClassMod = null;
             selectedClassCustomEffects.Clear();
             disablesNeedsList.Clear();
+            forcedTraitsList.Clear();
+            suppressedTraitsList.Clear();
             statFactors.Clear();
             statOffsets.Clear();
             statValueBuffers.Clear();
@@ -944,6 +1068,24 @@ namespace CustomGeneExporter
                     foreach (var need in disablesNeedsList)
                     {
                         sbAfter.AppendLine("CGET_RemovesNeed".Translate(need.label));
+                    }
+                }
+
+                if (forcedTraitsList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (var trait in forcedTraitsList)
+                    {
+                        sbAfter.AppendLine("CGET_ForcedTraitLine".Translate(GetTraitLabel(trait)));
+                    }
+                }
+
+                if (suppressedTraitsList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (var trait in suppressedTraitsList)
+                    {
+                        sbAfter.AppendLine("CGET_SuppressedTraitLine".Translate(GetTraitLabel(trait)));
                     }
                 }
 

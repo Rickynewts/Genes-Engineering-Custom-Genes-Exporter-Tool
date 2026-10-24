@@ -1,0 +1,6 @@
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\bin\Debug\Custom Genes Exporter Tool.dll
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\bin\Debug\Custom Genes Exporter Tool.pdb
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\obj\Debug\Custom Genes Exporter Tool.csproj.AssemblyReference.cache
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\obj\Debug\Custom Genes Exporter Tool.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\obj\Debug\Custom Genes Exporter Tool.dll
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CGET\Source\obj\Debug\Custom Genes Exporter Tool.pdb
