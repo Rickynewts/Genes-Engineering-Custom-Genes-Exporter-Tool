@@ -45,6 +45,38 @@
     <CGET_StatFactorsLabel>Stat factors:</CGET_StatFactorsLabel>
     <CGET_StatOffsetsLabel>Stat offsets:</CGET_StatOffsetsLabel>
 
+    <!-- Stats / capacities / health (extended fields) -->
+    <CGET_ExtendedFieldsLabel>Other Modifiers:</CGET_ExtendedFieldsLabel>
+    <CGET_AbilitiesLabel>Abilities:</CGET_AbilitiesLabel>
+    <CGET_MakeImmuneToLabel>Immune to (hediff):</CGET_MakeImmuneToLabel>
+    <CGET_HediffGiversCannotGiveLabel>Block hediff givers:</CGET_HediffGiversCannotGiveLabel>
+    <CGET_EnablesNeedsLabel>Enable needs:</CGET_EnablesNeedsLabel>
+    <CGET_CapModsLabel>Capacity mods:</CGET_CapModsLabel>
+    <CGET_DamageFactorsLabel>Damage factors:</CGET_DamageFactorsLabel>
+    <CGET_AptitudesLabel>Aptitudes:</CGET_AptitudesLabel>
+    <CGET_PassionModLabel>Passion mod:</CGET_PassionModLabel>
+    <CGET_PassionModTypeLabel>Passion mod</CGET_PassionModTypeLabel>
+    <CGET_SkillLabel>Skill</CGET_SkillLabel>
+    <CGET_PassionAddOne>Add one level</CGET_PassionAddOne>
+    <CGET_PassionDropAll>Drop all</CGET_PassionDropAll>
+    <CGET_None>None</CGET_None>
+    <CGET_MentalBreakLabel>Mental break:</CGET_MentalBreakLabel>
+    <CGET_MentalBreakMtbLabel>Mental break MTB (days):</CGET_MentalBreakMtbLabel>
+    <CGET_PainOffsetLabel>Pain offset:</CGET_PainOffsetLabel>
+    <CGET_PainFactorLabel>Pain factor:</CGET_PainFactorLabel>
+    <CGET_FoodPoisoningLabel>Food poisoning chance:</CGET_FoodPoisoningLabel>
+    <CGET_SocialFightLabel>Social fight chance:</CGET_SocialFightLabel>
+    <CGET_AggroMentalBreakLabel>Aggro break selection:</CGET_AggroMentalBreakLabel>
+    <CGET_LovinMtbLabel>Lovin MTB:</CGET_LovinMtbLabel>
+    <CGET_MissingGeneRomanceLabel>Missing gene romance:</CGET_MissingGeneRomanceLabel>
+    <CGET_PrisonBreakMtbLabel>Prison break MTB:</CGET_PrisonBreakMtbLabel>
+    <CGET_IgnoreDarknessLabel>Ignore darkness</CGET_IgnoreDarknessLabel>
+    <CGET_SterilizeLabel>Sterilize</CGET_SterilizeLabel>
+    <CGET_ImmuneToToxGasLabel>Immune to tox gas</CGET_ImmuneToToxGasLabel>
+    <CGET_ImmuneToVacuumBurnsLabel>Immune to vacuum burns</CGET_ImmuneToVacuumBurnsLabel>
+    <CGET_PreventPermanentWoundsLabel>Prevent permanent wounds</CGET_PreventPermanentWoundsLabel>
+    <CGET_DontMindRawFoodLabel>Don't mind raw food</CGET_DontMindRawFoodLabel>
+
     <CGET_IconPathLabel>[Optional] Custom icon path:</CGET_IconPathLabel>
     <CGET_IconFormatWarning>Icon format {0} is not supported by the game (use .png/.jpg). The default icon is used instead.</CGET_IconFormatWarning>
     <CGET_PreviewImagePathLabel>[Optional] Custom preview image path:</CGET_PreviewImagePathLabel>

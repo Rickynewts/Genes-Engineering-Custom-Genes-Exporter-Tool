@@ -45,6 +45,38 @@
     <CGET_StatFactorsLabel>属性加成（乘算）：</CGET_StatFactorsLabel>
     <CGET_StatOffsetsLabel>属性加成（加算）：</CGET_StatOffsetsLabel>
 
+    <!-- 数值 / 能力 / 健康修正（扩展字段） -->
+    <CGET_ExtendedFieldsLabel>其他修正：</CGET_ExtendedFieldsLabel>
+    <CGET_AbilitiesLabel>技能：</CGET_AbilitiesLabel>
+    <CGET_MakeImmuneToLabel>完全免疫（Hediff）：</CGET_MakeImmuneToLabel>
+    <CGET_HediffGiversCannotGiveLabel>阻止 HediffGiver：</CGET_HediffGiversCannotGiveLabel>
+    <CGET_EnablesNeedsLabel>启用需求：</CGET_EnablesNeedsLabel>
+    <CGET_CapModsLabel>能力修正：</CGET_CapModsLabel>
+    <CGET_DamageFactorsLabel>伤害系数：</CGET_DamageFactorsLabel>
+    <CGET_AptitudesLabel>技能天赋：</CGET_AptitudesLabel>
+    <CGET_PassionModLabel>技能热情：</CGET_PassionModLabel>
+    <CGET_PassionModTypeLabel>热情修正</CGET_PassionModTypeLabel>
+    <CGET_SkillLabel>技能</CGET_SkillLabel>
+    <CGET_PassionAddOne>提升一级</CGET_PassionAddOne>
+    <CGET_PassionDropAll>全部清除</CGET_PassionDropAll>
+    <CGET_None>无</CGET_None>
+    <CGET_MentalBreakLabel>精神崩溃类型：</CGET_MentalBreakLabel>
+    <CGET_MentalBreakMtbLabel>精神崩溃间隔（天）：</CGET_MentalBreakMtbLabel>
+    <CGET_PainOffsetLabel>疼痛加值：</CGET_PainOffsetLabel>
+    <CGET_PainFactorLabel>疼痛倍率：</CGET_PainFactorLabel>
+    <CGET_FoodPoisoningLabel>食物中毒几率：</CGET_FoodPoisoningLabel>
+    <CGET_SocialFightLabel>社交斗殴几率：</CGET_SocialFightLabel>
+    <CGET_AggroMentalBreakLabel>攻击性崩溃权重：</CGET_AggroMentalBreakLabel>
+    <CGET_LovinMtbLabel>亲热间隔：</CGET_LovinMtbLabel>
+    <CGET_MissingGeneRomanceLabel>缺基因恋爱几率：</CGET_MissingGeneRomanceLabel>
+    <CGET_PrisonBreakMtbLabel>越狱间隔：</CGET_PrisonBreakMtbLabel>
+    <CGET_IgnoreDarknessLabel>无视黑暗惩罚</CGET_IgnoreDarknessLabel>
+    <CGET_SterilizeLabel>绝育</CGET_SterilizeLabel>
+    <CGET_ImmuneToToxGasLabel>免疫毒气</CGET_ImmuneToToxGasLabel>
+    <CGET_ImmuneToVacuumBurnsLabel>免疫真空灼伤</CGET_ImmuneToVacuumBurnsLabel>
+    <CGET_PreventPermanentWoundsLabel>不留永久伤</CGET_PreventPermanentWoundsLabel>
+    <CGET_DontMindRawFoodLabel>不介意生食</CGET_DontMindRawFoodLabel>
+
     <CGET_IconPathLabel>[可选]自定义图标路径：</CGET_IconPathLabel>
     <CGET_IconFormatWarning>图标格式 {0} 游戏读不出来（请用 .png/.jpg），已改用默认图标。</CGET_IconFormatWarning>
     <CGET_PreviewImagePathLabel>[可选]自定义预览图路径：</CGET_PreviewImagePathLabel>

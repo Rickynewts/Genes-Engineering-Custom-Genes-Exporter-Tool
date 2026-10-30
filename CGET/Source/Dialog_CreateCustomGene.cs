@@ -36,8 +36,39 @@ namespace CustomGeneExporter
         private List<StatModifier> statFactors = new List<StatModifier>();//乘算
         private List<StatModifier> statOffsets = new List<StatModifier>(); //加算 
 
-        // 属性数值输入框的文本缓冲（不然每帧回填会导致小数输不进去）
+        // 属性数值输入框的文本缓冲
         private Dictionary<StatModifier, string> statValueBuffers = new Dictionary<StatModifier, string>();
+
+        //能力 / 健康 / 数值类扩展字段
+        private List<PawnCapacityModifier> capMods = new List<PawnCapacityModifier>();
+        private List<DamageFactor> damageFactors = new List<DamageFactor>();
+        private List<Aptitude> aptitudes = new List<Aptitude>();
+        private List<AbilityDef> abilitiesList = new List<AbilityDef>();
+        private List<HediffDef> makeImmuneToList = new List<HediffDef>();
+        private List<HediffDef> hediffGiversCannotGiveList = new List<HediffDef>();
+        private List<NeedDef> enablesNeedsList = new List<NeedDef>();
+        private PassionMod passionMod = null;
+        private MentalBreakDef mentalBreakDef = null;
+
+        private float painOffset = 0f;
+        private float painFactor = 1f;
+        private float foodPoisoningChanceFactor = 1f;
+        private float socialFightChanceFactor = 1f;
+        private float aggroMentalBreakSelectionChanceFactor = 1f;
+        private float lovinMTBFactor = 1f;
+        private float missingGeneRomanceChanceFactor = 1f;
+        private float prisonBreakMTBFactor = 1f;
+        private float mentalBreakMtbDays = 0f;
+
+        private bool geneIgnoreDarkness = false;
+        private bool geneSterilize = false;
+        private bool geneImmuneToToxGasExposure = false;
+        private bool geneImmuneToVacuumBurns = false;
+        private bool genePreventPermanentWounds = false;
+        private bool geneDontMindRawFood = false;
+
+        // 单值数值输入框的文本缓冲（按字段名区分）
+        private Dictionary<string, string> floatBuffers = new Dictionary<string, string>();
 
         // 待导出到同一个 Mod 的基因列表（右侧表格显示的就是它）
         private List<GeneExportSpec> pendingGenes = new List<GeneExportSpec>();
@@ -190,6 +221,11 @@ namespace CustomGeneExporter
 
         private Texture2D backgroundTexture = null;
 
+        //图标背景样式（仅界面预览，不影响导出）
+        private GeneBackgroundStyle backgroundStyle = GeneBackgroundStyle.Default;
+        private Texture2D backgroundTextureArchite = null;
+        private Texture2D backgroundTextureEndogene = null;
+
         public Dialog_CreateCustomGene()
         {
             this.forcePause = true;
@@ -201,6 +237,8 @@ namespace CustomGeneExporter
             previewTexture = defaultTexture;
 
             backgroundTexture = ContentFinder<Texture2D>.Get("CustomGeneExporter/GeneBackground", false);
+            backgroundTextureArchite = ContentFinder<Texture2D>.Get("CustomGeneExporter/GeneBackground_ArchiteGene", false) ?? backgroundTexture;
+            backgroundTextureEndogene = ContentFinder<Texture2D>.Get("CustomGeneExporter/GeneBackground_Endogene", false) ?? backgroundTexture;
 
             //加载默认预览图
             defaultPreviewTexture = ContentFinder<Texture2D>.Get("CustomGeneExporter/DefaultPreview", false);
@@ -491,6 +529,10 @@ namespace CustomGeneExporter
                     }
                 }
 
+                //启用需求（紧跟在禁用需求下面）
+                listing.GapLine();
+                DrawDefListSection(listing, "CGET_EnablesNeedsLabel", enablesNeedsList, x => x.label ?? x.defName);
+
                 listing.GapLine();
                 //强制获得特性
                 listing.Label("CGET_ForcedTraitsLabel".Translate());
@@ -636,6 +678,9 @@ namespace CustomGeneExporter
                         i--;
                     }
                 }
+
+                //能力 / 健康 / 数值类扩展字段
+                DrawExtendedFields(listing);
             }
             }
 
@@ -666,6 +711,353 @@ namespace CustomGeneExporter
             }
 
             listing.Gap(20f);
+        }
+
+        // 扩展字段：其他数值修正。
+        private void DrawExtendedFields(Listing_Standard listing)
+        {
+            Color highlightColor = new Color32(230, 212, 4, 255);
+
+            listing.GapLine();
+            listing.Label("CGET_ExtendedFieldsLabel".Translate());
+
+            //技能
+            DrawDefListSection(listing, "CGET_AbilitiesLabel", abilitiesList, x => x.label ?? x.defName);
+
+            //免疫 / 阻止 hediff
+            listing.GapLine();
+            DrawDefListSection(listing, "CGET_MakeImmuneToLabel", makeImmuneToList, x => x.label ?? x.defName);
+            DrawDefListSection(listing, "CGET_HediffGiversCannotGiveLabel", hediffGiversCannotGiveList, x => x.label ?? x.defName);
+
+            //能力修正
+            listing.GapLine();
+            listing.Label("CGET_CapModsLabel".Translate());
+            if (listing.ButtonText("CGET_Add".Translate()))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                var capacities = experimentalDebugMode
+                    ? DefDatabase<PawnCapacityDef>.AllDefsListForReading
+                    : DefDatabase<PawnCapacityDef>.AllDefsListForReading.Where(IsOfficialDef);
+                foreach (PawnCapacityDef capacity in capacities.OrderBy(x => x.label))
+                {
+                    PawnCapacityDef captured = capacity;
+                    options.Add(new FloatMenuOption(captured.label, delegate
+                    {
+                        if (!capMods.Any(x => x.capacity == captured))
+                        {
+                            capMods.Add(new PawnCapacityModifier { capacity = captured, offset = 0f, postFactor = 1f });
+                        }
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            for (int i = 0; i < capMods.Count; i++)
+            {
+                PawnCapacityModifier mod = capMods[i];
+                if (mod == null || mod.capacity == null)
+                {
+                    continue;
+                }
+
+                Rect rowRect = listing.GetRect(30f);
+                Widgets.Label(new Rect(rowRect.x, rowRect.y, 110f, 30f), mod.capacity.label);
+                DrawFloatField(new Rect(rowRect.x + 110f, rowRect.y, 75f, 28f), "capOffset_" + i, ref mod.offset);
+                DrawFloatField(new Rect(rowRect.x + 190f, rowRect.y, 75f, 28f), "capFactor_" + i, ref mod.postFactor);
+                if (Widgets.ButtonText(new Rect(rowRect.x + 270f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                {
+                    capMods.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //伤害系数
+            listing.GapLine();
+            listing.Label("CGET_DamageFactorsLabel".Translate());
+            if (listing.ButtonText("CGET_Add".Translate()))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                var damageDefs = experimentalDebugMode
+                    ? DefDatabase<DamageDef>.AllDefsListForReading
+                    : DefDatabase<DamageDef>.AllDefsListForReading.Where(IsOfficialDef);
+                foreach (DamageDef def in damageDefs.OrderBy(x => x.label))
+                {
+                    DamageDef captured = def;
+                    options.Add(new FloatMenuOption(captured.label, delegate
+                    {
+                        if (!damageFactors.Any(x => x.damageDef == captured))
+                        {
+                            damageFactors.Add(new DamageFactor { damageDef = captured, factor = 1f });
+                        }
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            for (int i = 0; i < damageFactors.Count; i++)
+            {
+                DamageFactor factor = damageFactors[i];
+                if (factor == null || factor.damageDef == null)
+                {
+                    continue;
+                }
+
+                Rect rowRect = listing.GetRect(30f);
+                Widgets.Label(new Rect(rowRect.x, rowRect.y, 170f, 30f), factor.damageDef.label);
+                DrawFloatField(new Rect(rowRect.x + 180f, rowRect.y, 90f, 28f), "dmgFactor_" + i, ref factor.factor);
+                if (Widgets.ButtonText(new Rect(rowRect.x + 280f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                {
+                    damageFactors.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //技能天赋
+            listing.GapLine();
+            listing.Label("CGET_AptitudesLabel".Translate());
+            if (listing.ButtonText("CGET_Add".Translate()))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                foreach (SkillDef skill in DefDatabase<SkillDef>.AllDefsListForReading.OrderBy(x => x.label))
+                {
+                    SkillDef captured = skill;
+                    options.Add(new FloatMenuOption(captured.label, delegate
+                    {
+                        if (!aptitudes.Any(x => x.skill == captured))
+                        {
+                            aptitudes.Add(new Aptitude(captured, 0));
+                        }
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            for (int i = 0; i < aptitudes.Count; i++)
+            {
+                Aptitude aptitude = aptitudes[i];
+                if (aptitude == null || aptitude.skill == null)
+                {
+                    continue;
+                }
+
+                Rect rowRect = listing.GetRect(30f);
+                Widgets.Label(new Rect(rowRect.x, rowRect.y, 170f, 30f), aptitude.skill.label);
+                DrawIntField(new Rect(rowRect.x + 180f, rowRect.y, 90f, 28f), "aptitude_" + i, ref aptitude.level);
+                if (Widgets.ButtonText(new Rect(rowRect.x + 280f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                {
+                    aptitudes.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //技能热情
+            listing.GapLine();
+            listing.Label("CGET_PassionModLabel".Translate());
+            string skillLabel = passionMod == null || passionMod.skill == null
+    ? "CGET_None".Translate().ToString()
+    : passionMod.skill.label;
+            if (listing.ButtonText("CGET_SkillLabel".Translate() + ": " + skillLabel))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                options.Add(new FloatMenuOption("CGET_None".Translate(), delegate
+                {
+                    passionMod = null;
+                }));
+                foreach (SkillDef skill in DefDatabase<SkillDef>.AllDefsListForReading.OrderBy(x => x.label))
+                {
+                    SkillDef captured = skill;
+                    options.Add(new FloatMenuOption(captured.label, delegate
+                    {
+                        PassionMod.PassionModType type = passionMod == null
+                            ? PassionMod.PassionModType.AddOneLevel
+                            : passionMod.modType;
+                        passionMod = new PassionMod(captured, type);
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            if (passionMod != null && passionMod.skill != null)
+            {
+                if (listing.ButtonText("CGET_PassionModTypeLabel".Translate() + ": " + GetPassionModTypeLabel(passionMod.modType)))
+                {
+                    List<FloatMenuOption> options = new List<FloatMenuOption>();
+                    foreach (PassionMod.PassionModType type in new[] { PassionMod.PassionModType.AddOneLevel, PassionMod.PassionModType.DropAll, PassionMod.PassionModType.None })
+                    {
+                        PassionMod.PassionModType captured = type;
+                        options.Add(new FloatMenuOption(GetPassionModTypeLabel(captured), delegate
+                        {
+                            passionMod.modType = captured;
+                        }));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+            }
+
+            //精神崩溃
+            listing.GapLine();
+            listing.Label("CGET_MentalBreakLabel".Translate());
+            string mentalBreakLabel = mentalBreakDef == null
+    ? "CGET_None".Translate().ToString()
+    : mentalBreakDef.label;
+            if (listing.ButtonText(mentalBreakLabel))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                options.Add(new FloatMenuOption("CGET_None".Translate(), delegate
+                {
+                    mentalBreakDef = null;
+                }));
+                var mentalBreakDefs = experimentalDebugMode
+                    ? DefDatabase<MentalBreakDef>.AllDefsListForReading
+                    : DefDatabase<MentalBreakDef>.AllDefsListForReading.Where(IsOfficialDef);
+                foreach (MentalBreakDef def in mentalBreakDefs.OrderBy(x => x.label))
+                {
+                    MentalBreakDef captured = def;
+                    options.Add(new FloatMenuOption(captured.label, delegate
+                    {
+                        mentalBreakDef = captured;
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+            DrawFloatRow(listing, "CGET_MentalBreakMtbLabel".Translate(), "mentalBreakMtbDays", ref mentalBreakMtbDays);
+
+            //数值修正
+            listing.GapLine();
+            DrawFloatRow(listing, "CGET_PainOffsetLabel".Translate(), "painOffset", ref painOffset);
+            DrawFloatRow(listing, "CGET_PainFactorLabel".Translate(), "painFactor", ref painFactor);
+            DrawFloatRow(listing, "CGET_FoodPoisoningLabel".Translate(), "foodPoisoningChanceFactor", ref foodPoisoningChanceFactor);
+            DrawFloatRow(listing, "CGET_SocialFightLabel".Translate(), "socialFightChanceFactor", ref socialFightChanceFactor);
+            DrawFloatRow(listing, "CGET_AggroMentalBreakLabel".Translate(), "aggroMentalBreakSelectionChanceFactor", ref aggroMentalBreakSelectionChanceFactor);
+            DrawFloatRow(listing, "CGET_LovinMtbLabel".Translate(), "lovinMTBFactor", ref lovinMTBFactor);
+            DrawFloatRow(listing, "CGET_MissingGeneRomanceLabel".Translate(), "missingGeneRomanceChanceFactor", ref missingGeneRomanceChanceFactor);
+            DrawFloatRow(listing, "CGET_PrisonBreakMtbLabel".Translate(), "prisonBreakMTBFactor", ref prisonBreakMTBFactor);
+
+            //布尔开关
+            listing.GapLine();
+            listing.CheckboxLabeled("CGET_IgnoreDarknessLabel".Translate(), ref geneIgnoreDarkness, null);
+            listing.CheckboxLabeled("CGET_SterilizeLabel".Translate(), ref geneSterilize, null);
+            listing.CheckboxLabeled("CGET_ImmuneToToxGasLabel".Translate(), ref geneImmuneToToxGasExposure, null);
+            listing.CheckboxLabeled("CGET_ImmuneToVacuumBurnsLabel".Translate(), ref geneImmuneToVacuumBurns, null);
+            listing.CheckboxLabeled("CGET_PreventPermanentWoundsLabel".Translate(), ref genePreventPermanentWounds, null);
+            listing.CheckboxLabeled("CGET_DontMindRawFoodLabel".Translate(), ref geneDontMindRawFood, null);
+        }
+
+        //判定是否官方 Def（Core 或官方 DLC）
+        private static bool IsOfficialDef(Def def)
+        {
+            return def != null && def.modContentPack != null
+                && (def.modContentPack.IsCoreMod || def.modContentPack.IsOfficialMod);
+        }
+
+        //通用 def 列表区块：标题 + 添加按钮 + 每行 名称/删除
+        private void DrawDefListSection<T>(Listing_Standard listing, string labelKey, List<T> list, Func<T, string> getLabel) where T : Def
+        {
+            listing.Label(labelKey.Translate());
+            if (listing.ButtonText("CGET_Add".Translate()))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                var defs = experimentalDebugMode
+                    ? DefDatabase<T>.AllDefsListForReading
+                    : DefDatabase<T>.AllDefsListForReading.Where(IsOfficialDef);
+                foreach (T def in defs.OrderBy(getLabel))
+                {
+                    T captured = def;
+                    options.Add(new FloatMenuOption(getLabel(captured), delegate
+                    {
+                        if (!list.Contains(captured))
+                        {
+                            list.Add(captured);
+                        }
+                    }));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                T def = list[i];
+                if (def == null)
+                {
+                    continue;
+                }
+
+                Rect rowRect = listing.GetRect(30f);
+                Widgets.Label(new Rect(rowRect.x, rowRect.y, 200f, 30f), getLabel(def));
+                if (Widgets.ButtonText(new Rect(rowRect.x + 320f, rowRect.y, 60f, 28f), "CGET_Delete".Translate()))
+                {
+                    list.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        private void DrawFloatRow(Listing_Standard listing, string label, string bufferKey, ref float value)
+        {
+            Rect rowRect = listing.GetRect(30f);
+            Widgets.Label(new Rect(rowRect.x, rowRect.y, 220f, 30f), label);
+            DrawFloatField(new Rect(rowRect.x + 230f, rowRect.y, 100f, 28f), bufferKey, ref value);
+        }
+
+        //单值浮点输入框：用缓冲保存玩家正在输入的文本，避免每帧被格式化回填
+        private void DrawFloatField(Rect rect, string bufferKey, ref float value)
+        {
+            string buffer;
+            if (!floatBuffers.TryGetValue(bufferKey, out buffer))
+            {
+                buffer = FormatFloatValue(value);
+                floatBuffers[bufferKey] = buffer;
+            }
+
+            string edited = Widgets.TextField(rect, buffer);
+            if (edited != buffer)
+            {
+                floatBuffers[bufferKey] = edited;
+                float parsed;
+                if (float.TryParse(edited, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed))
+                {
+                    value = parsed;
+                }
+            }
+        }
+
+        private void DrawIntField(Rect rect, string bufferKey, ref int value)
+        {
+            string buffer;
+            if (!floatBuffers.TryGetValue(bufferKey, out buffer))
+            {
+                buffer = value.ToString();
+                floatBuffers[bufferKey] = buffer;
+            }
+
+            string edited = Widgets.TextField(rect, buffer);
+            if (edited != buffer)
+            {
+                floatBuffers[bufferKey] = edited;
+                int parsed;
+                if (int.TryParse(edited, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+                {
+                    value = parsed;
+                }
+            }
+        }
+
+        private static string FormatFloatValue(float value)
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+
+        private static string GetPassionModTypeLabel(PassionMod.PassionModType type)
+        {
+            switch (type)
+            {
+                case PassionMod.PassionModType.AddOneLevel:
+                    return "CGET_PassionAddOne".Translate();
+                case PassionMod.PassionModType.DropAll:
+                    return "CGET_PassionDropAll".Translate();
+                default:
+                    return "CGET_None".Translate();
+            }
         }
 
         // 当前编辑区 -> 待导出条目
@@ -702,6 +1094,55 @@ namespace CustomGeneExporter
                     spec.StatOffsets.Add(new StatModifier { stat = offset.stat, value = offset.value });
                 }
             }
+
+            //扩展字段
+            foreach (PawnCapacityModifier mod in capMods)
+            {
+                if (mod != null && mod.capacity != null)
+                {
+                    spec.CapMods.Add(new PawnCapacityModifier
+                    {
+                        capacity = mod.capacity,
+                        offset = mod.offset,
+                        postFactor = mod.postFactor
+                    });
+                }
+            }
+            foreach (DamageFactor factor in damageFactors)
+            {
+                if (factor != null && factor.damageDef != null)
+                {
+                    spec.DamageFactors.Add(new DamageFactor { damageDef = factor.damageDef, factor = factor.factor });
+                }
+            }
+            foreach (Aptitude aptitude in aptitudes)
+            {
+                if (aptitude != null && aptitude.skill != null)
+                {
+                    spec.Aptitudes.Add(new Aptitude(aptitude.skill, aptitude.level));
+                }
+            }
+            spec.Abilities.AddRange(abilitiesList);
+            spec.MakeImmuneTo.AddRange(makeImmuneToList);
+            spec.HediffGiversCannotGive.AddRange(hediffGiversCannotGiveList);
+            spec.EnablesNeeds.AddRange(enablesNeedsList);
+            spec.PassionMod = passionMod == null ? null : new PassionMod(passionMod.skill, passionMod.modType);
+            spec.MentalBreakDef = mentalBreakDef;
+            spec.PainOffset = painOffset;
+            spec.PainFactor = painFactor;
+            spec.FoodPoisoningChanceFactor = foodPoisoningChanceFactor;
+            spec.SocialFightChanceFactor = socialFightChanceFactor;
+            spec.AggroMentalBreakSelectionChanceFactor = aggroMentalBreakSelectionChanceFactor;
+            spec.LovinMTBFactor = lovinMTBFactor;
+            spec.MissingGeneRomanceChanceFactor = missingGeneRomanceChanceFactor;
+            spec.PrisonBreakMTBFactor = prisonBreakMTBFactor;
+            spec.MentalBreakMtbDays = mentalBreakMtbDays;
+            spec.IgnoreDarkness = geneIgnoreDarkness;
+            spec.Sterilize = geneSterilize;
+            spec.ImmuneToToxGasExposure = geneImmuneToToxGasExposure;
+            spec.ImmuneToVacuumBurns = geneImmuneToVacuumBurns;
+            spec.PreventPermanentWounds = genePreventPermanentWounds;
+            spec.DontMindRawFood = geneDontMindRawFood;
 
             return spec;
         }
@@ -746,7 +1187,56 @@ namespace CustomGeneExporter
             {
                 statOffsets.Add(new StatModifier { stat = offset.stat, value = offset.value });
             }
+
+            //扩展字段
+            capMods.Clear();
+            foreach (PawnCapacityModifier mod in spec.CapMods)
+            {
+                capMods.Add(new PawnCapacityModifier
+                {
+                    capacity = mod.capacity,
+                    offset = mod.offset,
+                    postFactor = mod.postFactor
+                });
+            }
+            damageFactors.Clear();
+            foreach (DamageFactor factor in spec.DamageFactors)
+            {
+                damageFactors.Add(new DamageFactor { damageDef = factor.damageDef, factor = factor.factor });
+            }
+            aptitudes.Clear();
+            foreach (Aptitude aptitude in spec.Aptitudes)
+            {
+                aptitudes.Add(new Aptitude(aptitude.skill, aptitude.level));
+            }
+            abilitiesList.Clear();
+            abilitiesList.AddRange(spec.Abilities);
+            makeImmuneToList.Clear();
+            makeImmuneToList.AddRange(spec.MakeImmuneTo);
+            hediffGiversCannotGiveList.Clear();
+            hediffGiversCannotGiveList.AddRange(spec.HediffGiversCannotGive);
+            enablesNeedsList.Clear();
+            enablesNeedsList.AddRange(spec.EnablesNeeds);
+            passionMod = spec.PassionMod == null ? null : new PassionMod(spec.PassionMod.skill, spec.PassionMod.modType);
+            mentalBreakDef = spec.MentalBreakDef;
+            painOffset = spec.PainOffset;
+            painFactor = spec.PainFactor;
+            foodPoisoningChanceFactor = spec.FoodPoisoningChanceFactor;
+            socialFightChanceFactor = spec.SocialFightChanceFactor;
+            aggroMentalBreakSelectionChanceFactor = spec.AggroMentalBreakSelectionChanceFactor;
+            lovinMTBFactor = spec.LovinMTBFactor;
+            missingGeneRomanceChanceFactor = spec.MissingGeneRomanceChanceFactor;
+            prisonBreakMTBFactor = spec.PrisonBreakMTBFactor;
+            mentalBreakMtbDays = spec.MentalBreakMtbDays;
+            geneIgnoreDarkness = spec.IgnoreDarkness;
+            geneSterilize = spec.Sterilize;
+            geneImmuneToToxGasExposure = spec.ImmuneToToxGasExposure;
+            geneImmuneToVacuumBurns = spec.ImmuneToVacuumBurns;
+            genePreventPermanentWounds = spec.PreventPermanentWounds;
+            geneDontMindRawFood = spec.DontMindRawFood;
+
             statValueBuffers.Clear();
+            floatBuffers.Clear();
             selectedClassCustomEffects.Clear();
         }
 
@@ -796,6 +1286,32 @@ namespace CustomGeneExporter
             statFactors.Clear();
             statOffsets.Clear();
             statValueBuffers.Clear();
+
+            capMods.Clear();
+            damageFactors.Clear();
+            aptitudes.Clear();
+            abilitiesList.Clear();
+            makeImmuneToList.Clear();
+            hediffGiversCannotGiveList.Clear();
+            enablesNeedsList.Clear();
+            passionMod = null;
+            mentalBreakDef = null;
+            painOffset = 0f;
+            painFactor = 1f;
+            foodPoisoningChanceFactor = 1f;
+            socialFightChanceFactor = 1f;
+            aggroMentalBreakSelectionChanceFactor = 1f;
+            lovinMTBFactor = 1f;
+            missingGeneRomanceChanceFactor = 1f;
+            prisonBreakMTBFactor = 1f;
+            mentalBreakMtbDays = 0f;
+            geneIgnoreDarkness = false;
+            geneSterilize = false;
+            geneImmuneToToxGasExposure = false;
+            geneImmuneToVacuumBurns = false;
+            genePreventPermanentWounds = false;
+            geneDontMindRawFood = false;
+            floatBuffers.Clear();
         }
 
         // 编辑区里如果正在编辑列表里已有的基因，以编辑区为准；否则改了描述/数值再导出会写回旧数据
@@ -941,9 +1457,10 @@ namespace CustomGeneExporter
             Rect imgRect = new Rect(innerRect.xMax - imgSize, innerRect.y + 10f, imgSize, imgSize);
             Widgets.DrawBoxSolid(imgRect, new Color(0.1f, 0.1f, 0.1f, 0.5f));
 
-            if (backgroundTexture != null)
+            Texture2D currentBackground = GetCurrentBackgroundTexture();
+            if (currentBackground != null)
             {
-                GUI.DrawTexture(imgRect, backgroundTexture, ScaleMode.ScaleToFit);
+                GUI.DrawTexture(imgRect, currentBackground, ScaleMode.ScaleToFit);
             }
 
             float iconSize = imgSize * 0.7f;
@@ -983,6 +1500,30 @@ namespace CustomGeneExporter
                 Widgets.Label(labelRect, iconLabel);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
+
+            //图标背景样式切换：放在“（默认图标）”下面，只影响界面预览，不影响导出
+            float backgroundButtonY = (usingInheritedColorIcon || previewTexture == defaultTexture)
+                ? imgRect.yMax + 36f
+                : imgRect.yMax + 6f;
+            Rect backgroundButtonRect = new Rect(imgRect.x, backgroundButtonY, imgSize, 26f);
+            if (Widgets.ButtonText(backgroundButtonRect, GetBackgroundStyleLabel(backgroundStyle)))
+            {
+                List<FloatMenuOption> backgroundOptions = new List<FloatMenuOption>();
+                backgroundOptions.Add(new FloatMenuOption("CGET_BackgroundDefault".Translate(), delegate
+                {
+                    backgroundStyle = GeneBackgroundStyle.Default;
+                }));
+                backgroundOptions.Add(new FloatMenuOption("CGET_BackgroundArchite".Translate(), delegate
+                {
+                    backgroundStyle = GeneBackgroundStyle.Archite;
+                }));
+                backgroundOptions.Add(new FloatMenuOption("CGET_BackgroundEndogene".Translate(), delegate
+                {
+                    backgroundStyle = GeneBackgroundStyle.Endogene;
+                }));
+                Find.WindowStack.Add(new FloatMenu(backgroundOptions));
+            }
+            TooltipHandler.TipRegion(backgroundButtonRect, "CGET_BackgroundStyleTip".Translate());
 
             // 已添加基因表格 + 颜色调色板
             DrawPendingGenesTable(tableRect);
@@ -1106,6 +1647,195 @@ namespace CustomGeneExporter
                         sbAfter.AppendLine("• " + offset.stat.label + " " + DescribeStatModifier(offset, false));
                     }
                 }
+
+                //扩展字段：能力 / 健康 / 数值
+                if (capMods.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (PawnCapacityModifier mod in capMods)
+                    {
+                        if (mod == null || mod.capacity == null)
+                        {
+                            continue;
+                        }
+
+                        string line = "• " + mod.capacity.label;
+                        if (Math.Abs(mod.offset) > 0.0001f)
+                        {
+                            line += " " + (mod.offset >= 0f ? "+" : "") + FormatStatNumber(mod.offset);
+                        }
+                        if (Math.Abs(mod.postFactor - 1f) > 0.0001f)
+                        {
+                            line += " ×" + FormatStatNumber(mod.postFactor);
+                        }
+                        sbAfter.AppendLine(line);
+                    }
+                }
+
+                if (damageFactors.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (DamageFactor factor in damageFactors)
+                    {
+                        if (factor == null || factor.damageDef == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + factor.damageDef.label + " ×" + FormatStatNumber(factor.factor));
+                    }
+                }
+
+                if (aptitudes.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (Aptitude aptitude in aptitudes)
+                    {
+                        if (aptitude == null || aptitude.skill == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + aptitude.skill.label + " " + (aptitude.level >= 0 ? "+" : "") + aptitude.level);
+                    }
+                }
+
+                if (abilitiesList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (AbilityDef ability in abilitiesList)
+                    {
+                        if (ability == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + (string)"CGET_AbilitiesLabel".Translate() + ability.label);
+                    }
+                }
+
+                if (makeImmuneToList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (HediffDef hediff in makeImmuneToList)
+                    {
+                        if (hediff == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + (string)"CGET_MakeImmuneToLabel".Translate() + hediff.label);
+                    }
+                }
+
+                if (hediffGiversCannotGiveList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (HediffDef hediff in hediffGiversCannotGiveList)
+                    {
+                        if (hediff == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + (string)"CGET_HediffGiversCannotGiveLabel".Translate() + hediff.label);
+                    }
+                }
+
+                if (enablesNeedsList.Count > 0)
+                {
+                    hasListEffects = true;
+                    foreach (NeedDef need in enablesNeedsList)
+                    {
+                        if (need == null)
+                        {
+                            continue;
+                        }
+                        sbAfter.AppendLine("• " + (string)"CGET_EnablesNeedsLabel".Translate() + need.label);
+                    }
+                }
+
+                if (passionMod != null && passionMod.skill != null)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_PassionModLabel".Translate()
+                        + passionMod.skill.label + " " + GetPassionModTypeLabel(passionMod.modType));
+                }
+
+                if (mentalBreakDef != null || Math.Abs(mentalBreakMtbDays) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_MentalBreakLabel".Translate()
+                        + (mentalBreakDef == null ? "-" : mentalBreakDef.label)
+                        + " " + (string)"CGET_MentalBreakMtbLabel".Translate() + FormatStatNumber(mentalBreakMtbDays));
+                }
+
+                if (Math.Abs(painOffset) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_PainOffsetLabel".Translate() + FormatStatNumber(painOffset));
+                }
+                if (Math.Abs(painFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_PainFactorLabel".Translate() + "×" + FormatStatNumber(painFactor));
+                }
+                if (Math.Abs(foodPoisoningChanceFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_FoodPoisoningLabel".Translate() + "×" + FormatStatNumber(foodPoisoningChanceFactor));
+                }
+                if (Math.Abs(socialFightChanceFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_SocialFightLabel".Translate() + "×" + FormatStatNumber(socialFightChanceFactor));
+                }
+                if (Math.Abs(aggroMentalBreakSelectionChanceFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_AggroMentalBreakLabel".Translate() + "×" + FormatStatNumber(aggroMentalBreakSelectionChanceFactor));
+                }
+                if (Math.Abs(lovinMTBFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_LovinMtbLabel".Translate() + "×" + FormatStatNumber(lovinMTBFactor));
+                }
+                if (Math.Abs(missingGeneRomanceChanceFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_MissingGeneRomanceLabel".Translate() + "×" + FormatStatNumber(missingGeneRomanceChanceFactor));
+                }
+                if (Math.Abs(prisonBreakMTBFactor - 1f) > 0.0001f)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_PrisonBreakMtbLabel".Translate() + "×" + FormatStatNumber(prisonBreakMTBFactor));
+                }
+
+                if (geneIgnoreDarkness)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_IgnoreDarknessLabel".Translate());
+                }
+                if (geneSterilize)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_SterilizeLabel".Translate());
+                }
+                if (geneImmuneToToxGasExposure)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_ImmuneToToxGasLabel".Translate());
+                }
+                if (geneImmuneToVacuumBurns)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_ImmuneToVacuumBurnsLabel".Translate());
+                }
+                if (genePreventPermanentWounds)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_PreventPermanentWoundsLabel".Translate());
+                }
+                if (geneDontMindRawFood)
+                {
+                    hasListEffects = true;
+                    sbAfter.AppendLine("• " + (string)"CGET_DontMindRawFoodLabel".Translate());
+                }
             }
             else
             {
@@ -1138,6 +1868,33 @@ namespace CustomGeneExporter
 
             Widgets.Label(new Rect(0f, heightBefore + colorLineHeight, innerWidth, heightAfter), textAfter);
             Widgets.EndScrollView();
+        }
+
+        // 当前背景样式对应的贴图
+        private Texture2D GetCurrentBackgroundTexture()
+        {
+            switch (backgroundStyle)
+            {
+                case GeneBackgroundStyle.Archite:
+                    return backgroundTextureArchite ?? backgroundTexture;
+                case GeneBackgroundStyle.Endogene:
+                    return backgroundTextureEndogene ?? backgroundTexture;
+                default:
+                    return backgroundTexture;
+            }
+        }
+
+        private static string GetBackgroundStyleLabel(GeneBackgroundStyle style)
+        {
+            switch (style)
+            {
+                case GeneBackgroundStyle.Archite:
+                    return (string)"CGET_BackgroundArchite".Translate();
+                case GeneBackgroundStyle.Endogene:
+                    return (string)"CGET_BackgroundEndogene".Translate();
+                default:
+                    return (string)"CGET_BackgroundDefault".Translate();
+            }
         }
 
         // 颜色预览行：前缀文字 + 真实色块 + 数值文字

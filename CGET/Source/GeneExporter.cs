@@ -20,6 +20,14 @@ namespace CustomGeneExporter
         HairColor = 2
     }
 
+    //图标背景样式（仅界面预览，不影响导出）
+    public enum GeneBackgroundStyle
+    {
+        Default = 0,
+        Archite = 1,
+        Endogene = 2
+    }
+
     //待导出的基因
     public class GeneExportSpec
     {
@@ -45,6 +53,35 @@ namespace CustomGeneExporter
         //强制获得 / 强制抑制的特性
         public List<TraitDef> ForcedTraits = new List<TraitDef>();
         public List<TraitDef> SuppressedTraits = new List<TraitDef>();
+
+        //能力 / 健康 / 数值类扩展字段
+        public List<PawnCapacityModifier> CapMods = new List<PawnCapacityModifier>();
+        public List<DamageFactor> DamageFactors = new List<DamageFactor>();
+        public List<Aptitude> Aptitudes = new List<Aptitude>();
+        public List<AbilityDef> Abilities = new List<AbilityDef>();
+        public List<HediffDef> MakeImmuneTo = new List<HediffDef>();
+        public List<HediffDef> HediffGiversCannotGive = new List<HediffDef>();
+        public List<NeedDef> EnablesNeeds = new List<NeedDef>();
+
+        public PassionMod PassionMod;
+        public MentalBreakDef MentalBreakDef;
+
+        public float PainOffset;
+        public float PainFactor = 1f;
+        public float FoodPoisoningChanceFactor = 1f;
+        public float SocialFightChanceFactor = 1f;
+        public float AggroMentalBreakSelectionChanceFactor = 1f;
+        public float LovinMTBFactor = 1f;
+        public float MissingGeneRomanceChanceFactor = 1f;
+        public float PrisonBreakMTBFactor = 1f;
+        public float MentalBreakMtbDays;
+
+        public bool IgnoreDarkness;
+        public bool Sterilize;
+        public bool ImmuneToToxGasExposure;
+        public bool ImmuneToVacuumBurns;
+        public bool PreventPermanentWounds;
+        public bool DontMindRawFood;
 
         //导出时算出来的图标路径
         public string ResolvedIconPath;
@@ -549,10 +586,7 @@ namespace CustomGeneExporter
                             categoryDefName = gene.Category.defName;
                         }
 
-                        GenerateGeneDefFile(defsFolder, gene.Name, gene.Description ?? "", gene.Metabolism, gene.Complexity,
-                            gene.DisablesNeeds, gene.StatFactors, gene.StatOffsets,
-                            gene.ForcedTraits, gene.SuppressedTraits, gene.ResolvedIconPath,
-                            gene.GeneClass, gene.GeneClassMod, categoryDefName, gene.Category, cleanPackageId);
+                        GenerateGeneDefFile(defsFolder, gene, categoryDefName, cleanPackageId);
                     }
 
                     written++;
@@ -1153,12 +1187,21 @@ namespace CustomGeneExporter
         }
 
         private static void GenerateGeneDefFile(
-    string defsFolder, string name, string desc, int met, int cpx,
-    List<NeedDef> disablesNeeds, List<StatModifier> factors, List<StatModifier> offsets,
-    List<TraitDef> forcedTraits, List<TraitDef> suppressedTraits, string iconPath,
-    Type selectedGeneClass, ModContentPack selectedGeneClassMod,
-            string categoryDefName, GeneCategoryDef selectedCategory, string ownPackageId)
+            string defsFolder, GeneExportSpec gene, string categoryDefName, string ownPackageId)
         {
+            string name = gene.Name;
+            string desc = gene.Description ?? "";
+            int met = gene.Metabolism;
+            int cpx = gene.Complexity;
+            string iconPath = gene.ResolvedIconPath;
+            Type selectedGeneClass = gene.GeneClass;
+            ModContentPack selectedGeneClassMod = gene.GeneClassMod;
+            GeneCategoryDef selectedCategory = gene.Category;
+            List<NeedDef> disablesNeeds = gene.DisablesNeeds;
+            List<StatModifier> factors = gene.StatFactors;
+            List<StatModifier> offsets = gene.StatOffsets;
+            List<TraitDef> forcedTraits = gene.ForcedTraits;
+            List<TraitDef> suppressedTraits = gene.SuppressedTraits;
             string fileName = Path.Combine(defsFolder, GetGeneFileName(name));
 
             XElement geneDef = new XElement("GeneDef");
@@ -1283,6 +1326,55 @@ namespace CustomGeneExporter
                         geneDef.Add(statOffsetsElement);
                     }
                 }
+
+                //能力修正
+                AddCapMods(geneDef, gene.CapMods);
+
+                //伤害系数
+                AddDamageFactors(geneDef, gene.DamageFactors);
+
+                //技能天赋
+                AddAptitudes(geneDef, gene.Aptitudes);
+
+                //技能
+                AddDefRefList(geneDef, "abilities", gene.Abilities);
+
+                //免疫 / 抑制 hediff
+                AddDefRefList(geneDef, "makeImmuneTo", gene.MakeImmuneTo);
+                AddDefRefList(geneDef, "hediffGiversCannotGive", gene.HediffGiversCannotGive);
+
+                //启用需求
+                AddDefRefList(geneDef, "enablesNeeds", gene.EnablesNeeds);
+
+                //技能热情
+                AddPassionMod(geneDef, gene.PassionMod);
+
+                //数值修正
+                AddFloatField(geneDef, "painOffset", gene.PainOffset, 0f);
+                AddFloatField(geneDef, "painFactor", gene.PainFactor, 1f);
+                AddFloatField(geneDef, "foodPoisoningChanceFactor", gene.FoodPoisoningChanceFactor, 1f);
+                AddFloatField(geneDef, "socialFightChanceFactor", gene.SocialFightChanceFactor, 1f);
+                AddFloatField(geneDef, "aggroMentalBreakSelectionChanceFactor", gene.AggroMentalBreakSelectionChanceFactor, 1f);
+                AddFloatField(geneDef, "lovinMTBFactor", gene.LovinMTBFactor, 1f);
+                AddFloatField(geneDef, "missingGeneRomanceChanceFactor", gene.MissingGeneRomanceChanceFactor, 1f);
+                AddFloatField(geneDef, "prisonBreakMTBFactor", gene.PrisonBreakMTBFactor, 1f);
+                AddFloatField(geneDef, "mentalBreakMtbDays", gene.MentalBreakMtbDays, 0f);
+
+                //精神崩溃类型
+                if (gene.MentalBreakDef != null)
+                {
+                    XElement mentalBreakElement = new XElement("mentalBreakDef", gene.MentalBreakDef.defName);
+                    AddMayRequire(mentalBreakElement, gene.MentalBreakDef.modContentPack);
+                    geneDef.Add(mentalBreakElement);
+                }
+
+                //布尔开关
+                AddBoolField(geneDef, "ignoreDarkness", gene.IgnoreDarkness);
+                AddBoolField(geneDef, "sterilize", gene.Sterilize);
+                AddBoolField(geneDef, "immuneToToxGasExposure", gene.ImmuneToToxGasExposure);
+                AddBoolField(geneDef, "immuneToVacuumBurns", gene.ImmuneToVacuumBurns);
+                AddBoolField(geneDef, "preventPermanentWounds", gene.PreventPermanentWounds);
+                AddBoolField(geneDef, "dontMindRawFood", gene.DontMindRawFood);
             }
 
             XDocument defDoc = new XDocument(
@@ -1290,6 +1382,173 @@ namespace CustomGeneExporter
                 new XElement("Defs", geneDef));
             defDoc.Save(fileName);
         }
+        // 给元素加 MayRequire（非 Core 来源才需要）
+        private static void AddMayRequire(XElement element, ModContentPack pack)
+        {
+            if (element != null && pack != null && !pack.IsCoreMod)
+            {
+                element.Add(new XAttribute("MayRequire", pack.PackageId));
+            }
+        }
+
+        // <abilities>/<makeImmuneTo>/<enablesNeeds> 这类纯 defName 列表
+        private static void AddDefRefList(XElement geneDef, string elementName, IEnumerable<Def> defs)
+        {
+            if (defs == null)
+            {
+                return;
+            }
+
+            XElement list = new XElement(elementName);
+            foreach (Def def in defs)
+            {
+                if (def == null || string.IsNullOrEmpty(def.defName))
+                {
+                    continue;
+                }
+
+                XElement li = new XElement("li", def.defName);
+                AddMayRequire(li, def.modContentPack);
+                list.Add(li);
+            }
+
+            if (list.HasElements)
+            {
+                geneDef.Add(list);
+            }
+        }
+
+        // <capMods><li><capacity>..</capacity><offset>..</offset><postFactor>..</postFactor></li></capMods>
+        private static void AddCapMods(XElement geneDef, List<PawnCapacityModifier> mods)
+        {
+            if (mods == null || mods.Count == 0)
+            {
+                return;
+            }
+
+            XElement list = new XElement("capMods");
+            foreach (PawnCapacityModifier mod in mods)
+            {
+                if (mod == null || mod.capacity == null)
+                {
+                    continue;
+                }
+
+                XElement li = new XElement("li");
+                AddMayRequire(li, mod.capacity.modContentPack);
+                li.Add(new XElement("capacity", mod.capacity.defName));
+
+                if (Math.Abs(mod.offset) > 0.0001f)
+                {
+                    li.Add(new XElement("offset", FormatStatValue(mod.offset)));
+                }
+
+                if (Math.Abs(mod.postFactor - 1f) > 0.0001f)
+                {
+                    li.Add(new XElement("postFactor", FormatStatValue(mod.postFactor)));
+                }
+
+                list.Add(li);
+            }
+
+            if (list.HasElements)
+            {
+                geneDef.Add(list);
+            }
+        }
+
+        // <damageFactors><li><Flame>0.25</Flame></li></damageFactors>
+        private static void AddDamageFactors(XElement geneDef, List<DamageFactor> factors)
+        {
+            if (factors == null || factors.Count == 0)
+            {
+                return;
+            }
+
+            XElement list = new XElement("damageFactors");
+            foreach (DamageFactor factor in factors)
+            {
+                if (factor == null || factor.damageDef == null)
+                {
+                    continue;
+                }
+
+                // DamageFactor 是 LoadDataFromXmlCustom 类型：直接写成 <Flame>0.25</Flame>，不能包 <li>
+                XElement node = new XElement(factor.damageDef.defName, FormatStatValue(factor.factor));
+                AddMayRequire(node, factor.damageDef.modContentPack);
+                list.Add(node);
+            }
+
+            if (list.HasElements)
+            {
+                geneDef.Add(list);
+            }
+        }
+
+        // <aptitudes><li><Mining>2</Mining></li></aptitudes>
+        private static void AddAptitudes(XElement geneDef, List<Aptitude> aptitudes)
+        {
+            if (aptitudes == null || aptitudes.Count == 0)
+            {
+                return;
+            }
+
+            XElement list = new XElement("aptitudes");
+            foreach (Aptitude aptitude in aptitudes)
+            {
+                if (aptitude == null || aptitude.skill == null)
+                {
+                    continue;
+                }
+
+                // Aptitude 是 LoadDataFromXmlCustom 类型：写成 <Mining>2</Mining>，不能包 <li>
+                XElement node = new XElement(aptitude.skill.defName, aptitude.level);
+                AddMayRequire(node, aptitude.skill.modContentPack);
+                list.Add(node);
+            }
+
+            if (list.HasElements)
+            {
+                geneDef.Add(list);
+            }
+        }
+
+        // <passionMod><skill>Shooting</skill><modType>AddOneLevel</modType></passionMod>
+        private static void AddPassionMod(XElement geneDef, PassionMod passionMod)
+        {
+            if (passionMod == null || passionMod.skill == null)
+            {
+                return;
+            }
+
+            XElement element = new XElement("passionMod");
+            AddMayRequire(element, passionMod.skill.modContentPack);
+            element.Add(new XElement("skill", passionMod.skill.defName));
+            element.Add(new XElement("modType", passionMod.modType.ToString()));
+            geneDef.Add(element);
+        }
+
+        // 只写非默认值的单值字段
+        private static void AddFloatField(XElement geneDef, string name, float value, float defaultValue)
+        {
+            if (Math.Abs(value - defaultValue) <= 0.0001f)
+            {
+                return;
+            }
+
+            geneDef.Add(new XElement(name, FormatStatValue(value)));
+        }
+
+        private static void AddBoolField(XElement geneDef, string name, bool value)
+        {
+            if (!value)
+            {
+                return;
+            }
+
+            geneDef.Add(new XElement(name, "true"));
+        }
+
         private static string FormatStatValue(float value)
         {
             //格式
